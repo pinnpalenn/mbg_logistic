@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Real-time Driver Monitoring - MBG Logistics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9ff;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "error-container": "#ffdad6",
+                      "on-secondary-container": "#00714d",
+                      "secondary": "#006c49",
+                      "outline-variant": "#c5c5d3",
+                      "surface-tint": "#4059aa",
+                      "primary": "#00236f",
+                      "surface-bright": "#f8f9ff",
+                      "on-surface": "#0b1c30",
+                      "surface-container-highest": "#d3e4fe",
+                      "tertiary": "#3e2400",
+                      "tertiary-fixed": "#ffddb8",
+                      "on-primary-fixed-variant": "#264191",
+                      "surface-container-low": "#eff4ff",
+                      "primary-fixed-dim": "#b6c4ff",
+                      "on-background": "#0b1c30",
+                      "on-secondary-fixed": "#002113",
+                      "on-secondary-fixed-variant": "#005236",
+                      "surface-container": "#e5eeff",
+                      "on-primary": "#ffffff",
+                      "error": "#ba1a1a",
+                      "on-secondary": "#ffffff",
+                      "on-tertiary-fixed-variant": "#653e00",
+                      "on-tertiary": "#ffffff",
+                      "primary-container": "#1e3a8a",
+                      "tertiary-container": "#5c3800",
+                      "surface": "#f8f9ff",
+                      "on-tertiary-container": "#ef9900",
+                      "surface-container-high": "#dce9ff",
+                      "surface-container-lowest": "#ffffff",
+                      "inverse-on-surface": "#eaf1ff",
+                      "tertiary-fixed-dim": "#ffb95f",
+                      "on-primary-fixed": "#00164e",
+                      "secondary-container": "#6cf8bb",
+                      "surface-dim": "#cbdbf5",
+                      "on-error-container": "#93000a",
+                      "outline": "#757682",
+                      "surface-variant": "#d3e4fe",
+                      "on-primary-container": "#90a8ff",
+                      "on-tertiary-fixed": "#2a1700",
+                      "inverse-primary": "#b6c4ff",
+                      "inverse-surface": "#213145",
+                      "background": "#f8f9ff",
+                      "primary-fixed": "#dce1ff",
+                      "secondary-fixed-dim": "#4edea3",
+                      "on-error": "#ffffff",
+                      "secondary-fixed": "#6ffbbe",
+                      "on-surface-variant": "#444651"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "md": "16px",
+                      "xl": "32px",
+                      "sm": "8px",
+                      "xs": "4px",
+                      "gutter": "20px",
+                      "unit": "4px",
+                      "margin": "24px",
+                      "lg": "24px"
+              },
+              "fontFamily": {
+                      "h3": ["Inter"],
+                      "data-mono": ["Inter"],
+                      "h2": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "label-md": ["Inter"],
+                      "h1": ["Inter"],
+                      "body-md": ["Inter"],
+                      "body-sm": ["Inter"]
+              },
+              "fontSize": {
+                      "h3": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "data-mono": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                      "h2": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "label-md": ["13px", {"lineHeight": "18px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "h1": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline fixed top-0 w-full z-50 flex justify-between items-center w-full px-margin h-16">
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors">
+<span class="material-symbols-outlined text-primary dark:text-inverse-primary">menu</span>
+</button>
+<h1 class="text-h2 font-h2 font-bold text-primary dark:text-primary-fixed-dim">MBG Logistics</h1>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-6">
+<a class="text-on-surface-variant dark:text-surface-variant font-body-md hover:text-primary transition-colors" href="#">Stats</a>
+<a class="text-on-surface-variant dark:text-surface-variant font-body-md hover:text-primary transition-colors" href="#">Routes</a>
+<a class="text-on-surface-variant dark:text-surface-variant font-body-md hover:text-primary transition-colors" href="#">Schools</a>
+<a class="text-primary dark:text-primary-fixed-dim font-bold font-body-md" href="#">Drivers</a>
+</nav>
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container-highest border border-outline-variant">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a logistics manager in a modern office setting. The individual has a confident expression, wearing professional business casual attire. The background features blurred glass partitions and soft overhead corporate lighting. The overall image has a clean, high-key aesthetic with cool blue and white tones to match a professional design system." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAla842tp3UDC-XgOiW0PEiLM1PYbQeliRlLBAePIzPgI_5-t3Lk8dpnY3GUhZarWOAAA0awmdO_fyHYBRjRCztEW_JTDb-6qeBywwTYTHfzB-lySMdPb2duuh2_ZEqnRCoeS90X2zcMVEaREgzTO-cznnKUwRv5-5UvbsR86E5QnKLLUZmKgqnIFVZylOKu-Jc5eU3ye9OOvmGQ1zF4AmiK42PCVv8pQxBoa4qyrpP-vZtbpfhydHp4vWAg5WqaQN6J-yPV8-o_gs"/>
+</div>
+</div>
+</header>
+<main class="pt-16 pb-20 md:pb-0 h-screen flex flex-col md:flex-row overflow-hidden">
+<!-- Sidebar / Driver List -->
+<aside class="w-full md:w-96 bg-surface-container-lowest border-r border-outline-variant flex flex-col h-full z-10">
+<div class="p-margin border-b border-outline-variant">
+<div class="flex justify-between items-center mb-4">
+<h2 class="text-h3 font-h3 text-primary">Active Drivers</h2>
+<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-label-md">12 Online</span>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container rounded-lg border-none focus:ring-2 focus:ring-primary text-body-md" placeholder="Search vehicle or driver..." type="text"/>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto">
+<!-- Driver Card 1 -->
+<div class="p-md border-b border-outline-variant hover:bg-surface-container-low transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<div>
+<p class="font-bold text-body-lg text-on-surface">Budi Santoso</p>
+<p class="text-body-sm text-on-surface-variant">Vehicle: MBG-TX-001</p>
+</div>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-label-md">On Route</span>
+</div>
+<div class="grid grid-cols-2 gap-2 text-body-sm text-on-surface-variant">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">speed</span>
+<span>42 km/h</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">school</span>
+<span>SD Negeri 01 Jakarta</span>
+</div>
+</div>
+</div>
+<!-- Driver Card 2 (Selected) -->
+<div class="p-md border-b border-outline-variant bg-surface-container-high transition-colors cursor-pointer border-l-4 border-primary">
+<div class="flex justify-between items-start mb-2">
+<div>
+<p class="font-bold text-body-lg text-primary">Siti Aminah</p>
+<p class="text-body-sm text-on-surface-variant">Vehicle: MBG-TX-042</p>
+</div>
+<span class="bg-tertiary-container text-on-tertiary-container px-2 py-0.5 rounded text-label-md">At School</span>
+</div>
+<div class="grid grid-cols-2 gap-2 text-body-sm text-on-surface-variant">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">speed</span>
+<span>0 km/h</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">school</span>
+<span>SMP Pelita Harapan</span>
+</div>
+</div>
+</div>
+<!-- Driver Card 3 -->
+<div class="p-md border-b border-outline-variant hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<div>
+<p class="font-bold text-body-lg text-on-surface">Ahmad Hidayat</p>
+<p class="text-body-sm text-on-surface-variant">Vehicle: MBG-TX-015</p>
+</div>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-label-md">On Route</span>
+</div>
+<div class="grid grid-cols-2 gap-2 text-body-sm text-on-surface-variant">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">speed</span>
+<span>58 km/h</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">school</span>
+<span>SD Global Jaya</span>
+</div>
+</div>
+</div>
+<!-- Driver Card 4 -->
+<div class="p-md border-b border-outline-variant hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<div>
+<p class="font-bold text-body-lg text-on-surface">Dewi Lestari</p>
+<p class="text-body-sm text-on-surface-variant">Vehicle: MBG-TX-088</p>
+</div>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-label-md">On Route</span>
+</div>
+<div class="grid grid-cols-2 gap-2 text-body-sm text-on-surface-variant">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">speed</span>
+<span>35 km/h</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">school</span>
+<span>SD Mentari Pagi</span>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Map Section -->
+<section class="flex-1 relative bg-surface-dim">
+<img class="w-full h-full object-cover opacity-60 grayscale" data-alt="A highly detailed aerial view of a metropolitan city map layout with a silver-gray aesthetic. The map shows clearly defined street grids, highways, and residential blocks in a minimalist architectural style. Modern digital markers and glowing GPS pathways are overlaid on the streets in deep logistics blue and vibrant green, symbolizing real-time fleet movement. The lighting is bright and even, conveying a high-tech control center atmosphere." data-location="Jakarta" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCr3aTQ4eB-WzRuFNnpupCqP80MVvJxcRXz7yBiZ_hhfXffP_hKB0Thgle9tDcLtBGvuAGXIXTKYLyS_eMxBHJdiIxRP_0kX7xnIC9zjlsWIr1MAs06eNHJMH7xcQRGjmt77mB3yLl_pZec6hlhxYi_FSYT2J3r34VQ8mjXhDT-s0VrDfulRI6DSR8sBzQooM5HxTLqlEx5is3ccTHailF2qqIqJ_OsV3yDrP-Wbj0_ac6RkDwUbBmiytdgZzXwKIB8k71EE1iQmLM"/>
+<!-- Map Overlay Controls -->
+<div class="absolute top-margin left-margin flex flex-col gap-2">
+<button class="bg-surface-container-lowest p-2 rounded-lg shadow-md border border-outline-variant hover:bg-surface transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+<button class="bg-surface-container-lowest p-2 rounded-lg shadow-md border border-outline-variant hover:bg-surface transition-colors">
+<span class="material-symbols-outlined">remove</span>
+</button>
+</div>
+<div class="absolute top-margin right-margin">
+<div class="bg-surface-container-lowest p-md rounded-xl shadow-md border border-outline-variant flex gap-4">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-secondary"></div>
+<span class="text-label-md">Active</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-tertiary-container"></div>
+<span class="text-label-md">Stationary</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-error"></div>
+<span class="text-label-md">Alert</span>
+</div>
+</div>
+</div>
+<!-- Custom Markers (Simulated) -->
+<div class="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+<div class="bg-primary text-on-primary p-2 rounded-lg shadow-xl mb-1 flex items-center gap-2 scale-110">
+<span class="material-symbols-outlined text-sm">local_shipping</span>
+<span class="text-xs font-bold">MBG-TX-042</span>
+</div>
+<div class="w-3 h-3 bg-primary rounded-full border-2 border-white shadow-lg animate-pulse"></div>
+</div>
+<div class="absolute top-1/4 right-1/4 flex flex-col items-center opacity-80">
+<div class="bg-surface-container-highest text-primary p-1.5 rounded-lg shadow-md mb-1 flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">local_shipping</span>
+<span class="text-[10px] font-bold">MBG-TX-001</span>
+</div>
+<div class="w-2.5 h-2.5 bg-secondary rounded-full border-2 border-white shadow-lg"></div>
+</div>
+<!-- Driver Detail Floating Card (Bottom) -->
+<div class="absolute bottom-margin left-margin right-margin md:left-auto md:w-80 bg-surface-container-lowest p-lg rounded-xl shadow-xl border border-outline-variant animate-in fade-in slide-in-from-bottom-4">
+<div class="flex items-center gap-4 mb-4">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container-high">
+<img alt="Driver Siti" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdFD50B2usLeMYo7it3aAsXHU3hs-jiWIvI-wcHzW2WEU2QhavYVit52KCm07T7NNfyLN2xLi6CsYZaINCj8D7bVW1_D6hd3y3DRAovyFRO3TtoD3lSvPCnO3yb8eu298yeImrVLV1FBKPxy0iYC48-7bpu4HsFYjgEbtf2Xj20J-_dTfD3JK1-oAFYdYfD9NNO7pQjEtzMGbxRkfJGNufWqU9wFX7MUBdseR-zlwP3hXpBUAsfdjkVKnuxrnBvVPvYKVgFwREHR4"/>
+</div>
+<div>
+<h4 class="font-bold text-body-lg">Siti Aminah</h4>
+<p class="text-body-sm text-on-surface-variant">License: B 1234 XYZ</p>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center pb-2 border-b border-outline-variant">
+<span class="text-body-sm text-on-surface-variant">Destination</span>
+<span class="text-body-sm font-semibold">SMP Pelita Harapan</span>
+</div>
+<div class="flex justify-between items-center pb-2 border-b border-outline-variant">
+<span class="text-body-sm text-on-surface-variant">ETA</span>
+<span class="text-body-sm font-semibold text-secondary">Arrived</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-body-sm text-on-surface-variant">Payload</span>
+<span class="text-body-sm font-semibold">450 Meals</span>
+</div>
+</div>
+<button class="w-full mt-4 bg-primary text-on-primary py-2 rounded-lg font-label-md hover:opacity-90 transition-opacity">
+                    CONTACT DRIVER
+                </button>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-sm bg-surface dark:bg-inverse-surface border-t border-outline-variant shadow-md">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-label-md">Stats</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">map</span>
+<span class="text-label-md">Routes</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">domain</span>
+<span class="text-label-md">Schools</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-full px-4 py-1 scale-95" href="#">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="text-label-md">Drivers</span>
+</a>
+</nav>
+</body></html>

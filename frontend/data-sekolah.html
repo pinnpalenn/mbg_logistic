@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Data Sekolah — Sistem MBG</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+</head>
+<body>
+<div class="app-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🍱</div>
+      <div class="logo-text"><h3>Distribusi MBG</h3><span>Sistem Rute Optimal</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Menu Utama</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+      <a class="nav-item" href="optimasi.html"><span class="nav-icon">🗺️</span> Optimasi Rute</a>
+      <a class="nav-item" href="riwayat.html"><span class="nav-icon">📋</span> Riwayat Distribusi</a>
+      <div class="nav-label" style="margin-top:16px">Manajemen Data</div>
+      <a class="nav-item" href="data-dapur.html"><span class="nav-icon">🏠</span> Data Dapur</a>
+      <a class="nav-item active" href="data-sekolah.html"><span class="nav-icon">🏫</span> Data Sekolah</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar" id="userAvatar">A</div>
+        <div class="user-info"><div class="user-name" id="userName">Admin</div><div class="user-role">Administrator</div></div>
+      </div>
+      <a class="nav-item" href="#" id="logoutBtn" style="margin-top:4px"><span class="nav-icon">🚪</span> Keluar</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <h2 class="topbar-title">🏫 Manajemen Data Sekolah</h2>
+    </header>
+
+    <main class="page">
+      <div class="mb-3">
+        <h1>Data Sekolah Penerima MBG</h1>
+        <p>Kelola daftar Sekolah yang menjadi tujuan distribusi tiap Dapur.</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:380px 1fr;gap:20px;align-items:start">
+
+        <!-- Form Tambah -->
+        <div class="card">
+          <h3 class="card-title mb-3">➕ Tambah Sekolah Baru</h3>
+          <form id="formSekolah">
+            <div class="form-group">
+              <label class="form-label">Dialokasikan ke Dapur *</label>
+              <select class="form-control" id="inputDapur" required>
+                <option value="">— Pilih Dapur —</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nama Sekolah *</label>
+              <input class="form-control" id="inputNama" placeholder="cth: SDN 01 Cupak" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Latitude *</label>
+              <input class="form-control" id="inputLat" type="number" step="any" placeholder="cth: -1.594500" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Longitude *</label>
+              <input class="form-control" id="inputLng" type="number" step="any" placeholder="cth: 101.478300" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Jumlah Porsi MBG</label>
+              <input class="form-control" id="inputPorsi" type="number" min="0" placeholder="cth: 100"/>
+            </div>
+            <button class="btn btn-primary btn-block" type="submit" id="btnTambah">
+              <span id="btnText">Simpan Sekolah</span>
+              <span class="spinner hidden" id="btnSpinner"></span>
+            </button>
+          </form>
+          <div class="text-sm text-muted mt-2" style="background:var(--bg-card2);padding:10px;border-radius:var(--radius-md);line-height:1.6">
+            💡 <strong>Tips:</strong> Klik di peta di bawah untuk otomatis mengisi koordinat lat/lon.
+          </div>
+          <div id="minimap" style="height:200px;margin-top:12px;border-radius:var(--radius-md);border:1px solid var(--border)"></div>
+        </div>
+
+        <!-- List Sekolah -->
+        <div class="card">
+          <div class="card-header" style="margin-bottom:14px">
+            <h3 class="card-title">📋 Daftar Sekolah Terdaftar</h3>
+            <div style="display:flex;gap:8px">
+              <select class="form-control" id="filterDapur" style="width:auto;font-size:0.83rem;padding:6px 10px">
+                <option value="">Semua Dapur</option>
+              </select>
+              <button class="btn btn-secondary btn-sm" id="btnRefresh">🔄</button>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr><th>ID</th><th>Nama Sekolah</th><th>Dapur</th><th>Porsi</th><th>Koordinat</th><th>Aksi</th></tr>
+              </thead>
+              <tbody id="sekolahTable">
+                <tr><td colspan="6" class="text-center text-muted" style="padding:24px">Memuat...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="loading-overlay" id="deleteModal">
+  <div class="loading-box" style="text-align:left;min-width:320px">
+    <h3 style="margin-bottom:8px">🗑️ Hapus Sekolah?</h3>
+    <p style="margin-bottom:16px">Sekolah <strong id="deleteTarget"></strong> akan dihapus.</p>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-secondary" id="cancelDelete">Batal</button>
+      <button class="btn btn-danger" id="confirmDelete">Hapus</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/api.js"></script>
+<script>
+  if (!isLoggedIn()) window.location.href = 'index.html';
+
+  function showToast(msg, type = 'info') {
+    const tc = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<span>${{success:'✅',error:'❌',info:'ℹ️'}[type]||'ℹ️'}</span><span>${msg}</span>`;
+    tc.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  const user = JSON.parse(sessionStorage.getItem('mbg_user') || '{}');
+  document.getElementById('userName').textContent = user.username || 'Admin';
+  document.getElementById('userAvatar').textContent = (user.username || 'A')[0].toUpperCase();
+  document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout(); });
+
+  let allDapur = [], allSekolah = [], deleteId = null;
+
+  // Mini-map untuk pilih koordinat
+  const minimap = L.map('minimap').setView([-0.867, 100.647], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 18 }).addTo(minimap);
+  let minimapPin = null;
+  minimap.on('click', function(e) {
+    const { lat, lng } = e.latlng;
+    document.getElementById('inputLat').value = lat.toFixed(6);
+    document.getElementById('inputLng').value = lng.toFixed(6);
+    if (minimapPin) minimap.removeLayer(minimapPin);
+    minimapPin = L.marker([lat, lng], {
+      icon: L.divIcon({
+        html: `<div style="background:#F59E0B;color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid white">+</div>`,
+        iconSize:[28,28],iconAnchor:[14,14],className:''
+      })
+    }).addTo(minimap).bindPopup(`📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`).openPopup();
+    showToast('📍 Koordinat terisi dari klik peta!', 'info');
+  });
+
+  async function loadDapur() {
+    const res = await getDapur();
+    allDapur = res.data;
+    const opts = allDapur.map(d => `<option value="${d.id_dapur}">${d.nama_dapur}</option>`).join('');
+    document.getElementById('inputDapur').innerHTML = '<option value="">— Pilih Dapur —</option>' + opts;
+    document.getElementById('filterDapur').innerHTML = '<option value="">Semua Dapur</option>' + opts;
+  }
+
+  async function loadSekolah(idDapur = null) {
+    const res = await getSekolah(idDapur ? parseInt(idDapur) : null);
+    allSekolah = res.data;
+    renderTable(allSekolah);
+  }
+
+  function renderTable(data) {
+    const tbody = document.getElementById('sekolahTable');
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted" style="padding:24px">Belum ada data sekolah.</td></tr>';
+      return;
+    }
+    const dapurMap = {};
+    allDapur.forEach(d => dapurMap[d.id_dapur] = d.nama_dapur);
+
+    tbody.innerHTML = data.map(s => `
+      <tr>
+        <td><span class="badge badge-blue">${s.id_sekolah}</span></td>
+        <td><strong>${s.nama_sekolah}</strong></td>
+        <td><span class="badge badge-green">${dapurMap[s.id_dapur] || 'Dapur #'+s.id_dapur}</span></td>
+        <td><span style="color:var(--primary);font-weight:600">🍱 ${s.porsi_mbg}</span></td>
+        <td class="text-sm text-muted">${parseFloat(s.latitude).toFixed(4)}, ${parseFloat(s.longitude).toFixed(4)}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="openDelete(${s.id_sekolah},'${s.nama_sekolah.replace(/'/g,'')}')">🗑️</button></td>
+      </tr>`).join('');
+  }
+
+  document.getElementById('formSekolah').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btnTambah');
+    const spinner = document.getElementById('btnSpinner');
+    const btnText = document.getElementById('btnText');
+    btn.disabled = true; spinner.classList.remove('hidden'); btnText.textContent = 'Menyimpan...';
+    try {
+      await addSekolah({
+        id_dapur: parseInt(document.getElementById('inputDapur').value),
+        nama_sekolah: document.getElementById('inputNama').value.trim(),
+        latitude: parseFloat(document.getElementById('inputLat').value),
+        longitude: parseFloat(document.getElementById('inputLng').value),
+        porsi_mbg: parseInt(document.getElementById('inputPorsi').value) || 0,
+      });
+      showToast('Sekolah berhasil ditambahkan!', 'success');
+      e.target.reset();
+      await loadSekolah(document.getElementById('filterDapur').value);
+    } catch (err) {
+      showToast('Gagal: ' + err.message, 'error');
+    } finally {
+      btn.disabled = false; spinner.classList.add('hidden'); btnText.textContent = 'Simpan Sekolah';
+    }
+  });
+
+  function openDelete(id, nama) {
+    deleteId = id;
+    document.getElementById('deleteTarget').textContent = nama;
+    document.getElementById('deleteModal').classList.add('show');
+  }
+  document.getElementById('cancelDelete').addEventListener('click', () => {
+    deleteId = null; document.getElementById('deleteModal').classList.remove('show');
+  });
+  document.getElementById('confirmDelete').addEventListener('click', async () => {
+    if (!deleteId) return;
+    try {
+      await deleteSekolah(deleteId);
+      showToast('Sekolah dihapus', 'success');
+      document.getElementById('deleteModal').classList.remove('show');
+      deleteId = null;
+      await loadSekolah(document.getElementById('filterDapur').value);
+    } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  });
+
+  document.getElementById('filterDapur').addEventListener('change', (e) => loadSekolah(e.target.value));
+  document.getElementById('btnRefresh').addEventListener('click', () => loadSekolah(document.getElementById('filterDapur').value));
+
+  (async () => { await loadDapur(); await loadSekolah(); })();
+</script>
+</body>
+</html>

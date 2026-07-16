@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Konfigurasi Algoritma - MBG Logistics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-primary": "#b6c4ff",
+                    "inverse-surface": "#213145",
+                    "background": "#f8f9ff",
+                    "surface-variant": "#d3e4fe",
+                    "outline": "#757682",
+                    "surface-dim": "#cbdbf5",
+                    "secondary-container": "#6cf8bb",
+                    "on-error-container": "#93000a",
+                    "on-tertiary-fixed": "#2a1700",
+                    "on-primary-container": "#90a8ff",
+                    "on-surface-variant": "#444651",
+                    "primary-fixed": "#dce1ff",
+                    "secondary-fixed": "#6ffbbe",
+                    "on-error": "#ffffff",
+                    "secondary-fixed-dim": "#4edea3",
+                    "tertiary-container": "#5c3800",
+                    "surface": "#f8f9ff",
+                    "on-tertiary-container": "#ef9900",
+                    "primary-container": "#1e3a8a",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "on-primary-fixed": "#00164e",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-on-surface": "#eaf1ff",
+                    "surface-container-high": "#dce9ff",
+                    "tertiary-fixed": "#ffddb8",
+                    "tertiary": "#3e2400",
+                    "surface-container-highest": "#d3e4fe",
+                    "on-surface": "#0b1c30",
+                    "surface-bright": "#f8f9ff",
+                    "surface-container": "#e5eeff",
+                    "on-secondary-fixed-variant": "#005236",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed": "#002113",
+                    "on-secondary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "primary-fixed-dim": "#b6c4ff",
+                    "surface-container-low": "#eff4ff",
+                    "on-primary-fixed-variant": "#264191",
+                    "on-background": "#0b1c30",
+                    "on-secondary-container": "#00714d",
+                    "error-container": "#ffdad6",
+                    "outline-variant": "#c5c5d3",
+                    "surface-tint": "#4059aa",
+                    "primary": "#00236f",
+                    "secondary": "#006c49"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "md": "16px",
+                    "xl": "32px",
+                    "sm": "8px",
+                    "xs": "4px",
+                    "gutter": "20px",
+                    "unit": "4px",
+                    "margin": "24px",
+                    "lg": "24px"
+            },
+            "fontFamily": {
+                    "label-md": ["Inter"],
+                    "h2": ["Inter"],
+                    "data-mono": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "h1": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "body-md": ["Inter"],
+                    "h3": ["Inter"]
+            },
+            "fontSize": {
+                    "label-md": ["13px", {"lineHeight": "18px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "h2": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "data-mono": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "h1": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "h3": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 20px;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid #E2E8F0;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar Shell -->
+<header class="flex justify-between items-center w-full px-margin h-16 bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline sticky top-0 z-50">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary dark:text-inverse-primary">menu</span>
+<h2 class="text-h2 font-h2 font-bold text-primary dark:text-primary-fixed-dim">MBG Logistics</h2>
+</div>
+<div class="flex items-center gap-md">
+<nav class="hidden md:flex gap-lg">
+<a class="text-on-surface-variant dark:text-surface-variant font-label-md hover:bg-surface-container transition-colors px-3 py-2 rounded-lg" href="#">Stats</a>
+<a class="text-primary dark:text-primary-fixed-dim font-bold font-label-md px-3 py-2 rounded-lg" href="#">Routes</a>
+<a class="text-on-surface-variant dark:text-surface-variant font-label-md hover:bg-surface-container transition-colors px-3 py-2 rounded-lg" href="#">Schools</a>
+<a class="text-on-surface-variant dark:text-surface-variant font-label-md hover:bg-surface-container transition-colors px-3 py-2 rounded-lg" href="#">Drivers</a>
+</nav>
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-on-surface-variant">person</span>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto p-margin">
+<!-- Header Section -->
+<div class="mb-lg">
+<h1 class="text-h1 font-h1 text-primary">Konfigurasi Optimasi Rute</h1>
+<p class="text-on-surface-variant text-body-lg">Atur parameter algoritma untuk efisiensi distribusi makanan bergizi gratis.</p>
+</div>
+<div class="bento-grid">
+<!-- Algorithm Selection Card -->
+<div class="col-span-12 lg:col-span-4 glass-card p-lg rounded-xl shadow-sm">
+<div class="flex items-center gap-sm mb-md pb-sm border-b border-outline-variant">
+<span class="material-symbols-outlined text-primary">settings_input_component</span>
+<h3 class="text-h3 font-h3 text-primary">Pilih Algoritma</h3>
+</div>
+<div class="space-y-md">
+<div class="group">
+<label class="text-label-md text-on-surface-variant mb-xs block">Model Optimasi</label>
+<select class="w-full bg-surface border border-outline-variant rounded-lg p-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none text-body-md">
+<option>Dijkstra (Shortest Path)</option>
+<option selected="">Traveling Salesman Problem (TSP)</option>
+<option>Ant Colony Optimization (ACO)</option>
+</select>
+</div>
+<div class="p-sm bg-surface-container-low rounded-lg border border-outline-variant">
+<p class="text-body-sm text-on-surface-variant">
+<span class="font-bold text-primary">TSP</span> paling cocok untuk rute satu kendaraan dengan banyak titik jemput/antar untuk meminimalkan total jarak tempuh.
+                        </p>
+</div>
+</div>
+</div>
+<!-- Parameters Card -->
+<div class="col-span-12 lg:col-span-8 glass-card p-lg rounded-xl shadow-sm">
+<div class="flex items-center gap-sm mb-md pb-sm border-b border-outline-variant">
+<span class="material-symbols-outlined text-primary">tune</span>
+<h3 class="text-h3 font-h3 text-primary">Parameter Teknis</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+<div class="space-y-md">
+<div>
+<div class="flex justify-between mb-xs">
+<label class="text-label-md text-on-surface-variant">Bobot Jarak (Distance)</label>
+<span class="text-primary font-bold">75%</span>
+</div>
+<input class="w-full h-2 bg-surface-container rounded-full appearance-none cursor-pointer accent-primary" type="range"/>
+</div>
+<div>
+<div class="flex justify-between mb-xs">
+<label class="text-label-md text-on-surface-variant">Prioritas Waktu (SLA)</label>
+<span class="text-primary font-bold">40%</span>
+</div>
+<input class="w-full h-2 bg-surface-container rounded-full appearance-none cursor-pointer accent-primary" type="range"/>
+</div>
+</div>
+<div class="space-y-md">
+<div class="group">
+<label class="text-label-md text-on-surface-variant mb-xs block">Kapasitas Muatan (Box)</label>
+<div class="relative">
+<input class="w-full bg-surface border border-outline-variant rounded-lg p-sm pr-12 focus:ring-2 focus:ring-primary outline-none" type="number" value="1000"/>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 text-body-sm text-outline">Units</span>
+</div>
+</div>
+<div class="flex items-center gap-sm p-sm bg-tertiary-fixed rounded-lg">
+<span class="material-symbols-outlined text-tertiary">info</span>
+<p class="text-body-sm text-tertiary">Data kapasitas disesuaikan dengan standar truk pendingin MBG-01.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Map/Visualization Preview (Bento Large) -->
+<div class="col-span-12 lg:col-span-7 h-[400px] relative overflow-hidden rounded-xl shadow-sm border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A sophisticated digital logistics map interface showing a grayscale urban area of Jakarta with glowing blue interconnected route paths and circular school delivery points. The visual style is professional and clean, featuring a minimal aesthetic with high-contrast data overlays and a subtle blueprint texture, reflecting a modern light-mode corporate dashboard environment." data-location="Jakarta, Indonesia" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkYMEDCUfLehl0MKCcHkB2Em9OZM5PjNUDY9BjXVVKo21MrBXNQAVFtTG8li116ODY_Jnqyy823sz2srdbN1ZVOVmvJ6HVaZlkMZqXApWmDz3bko07HHBLnkKo1LGjV_mNWgiYJKoBY-ppcxS8dtARRwVi7Q5d6fjD7FifCIIrKyhrG8lXuF2eLAiYxAWU3mwbhEg4aMrQJk0gEuAoQiGU80pXz9SaIltjsEoF9QLmuogsaPqxYf_fAP6W0eoi7bDy-atIDY5Ds1o"/>
+<div class="absolute top-4 left-4 flex gap-xs">
+<span class="bg-primary text-on-primary px-3 py-1 rounded-full text-label-md flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">navigation</span> Live Preview
+                    </span>
+<span class="bg-surface/90 text-on-surface px-3 py-1 rounded-full text-label-md border border-outline-variant">
+                        8 Sekolah Terpilih
+                    </span>
+</div>
+</div>
+<!-- Schools Table Card -->
+<div class="col-span-12 lg:col-span-5 glass-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="p-md bg-surface border-b border-outline-variant flex justify-between items-center">
+<h3 class="text-h3 font-h3 text-primary">Titik Pengiriman</h3>
+<button class="text-primary hover:bg-primary-container/10 p-1 rounded transition-colors">
+<span class="material-symbols-outlined">add_location</span>
+</button>
+</div>
+<div class="overflow-y-auto max-h-[330px] flex-grow">
+<table class="w-full text-left">
+<thead class="sticky top-0 bg-surface-container-low text-label-md text-on-surface-variant border-b border-outline-variant">
+<tr>
+<th class="px-md py-sm">Nama Sekolah</th>
+<th class="px-md py-sm">Kuota</th>
+<th class="px-md py-sm">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant"><tr class="hover:bg-surface-container transition-colors group">
+<td class="px-md py-sm">
+<div class="text-body-md font-bold">Sekolah Jalan Baru</div>
+<div class="text-body-sm text-outline">Jakarta Selatan</div>
+</td>
+<td class="px-md py-sm font-data-mono">800</td>
+<td class="px-md py-sm">
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold">SIAP</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container transition-colors group">
+<td class="px-md py-sm">
+<div class="text-body-md font-bold">Heler Mama</div>
+<div class="text-body-sm text-outline">Jakarta Barat</div>
+</td>
+<td class="px-md py-sm font-data-mono">200</td>
+<td class="px-md py-sm">
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold">SIAP</span>
+</td>
+</tr></tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Call to Action Section -->
+<div class="mt-xl flex flex-col md:flex-row items-center justify-between gap-lg bg-primary-container p-lg rounded-2xl text-on-primary-container shadow-lg">
+<div class="flex items-center gap-md">
+<div class="p-sm bg-on-primary-container/20 rounded-xl">
+<span class="material-symbols-outlined text-[48px] text-on-primary">rocket_launch</span>
+</div>
+<div>
+<h3 class="text-h3 font-h3 text-white">Sistem Siap Dioptimasi</h3>
+<p class="text-on-primary-container/80 text-body-md">Estimasi waktu kalkulasi rute: <span class="font-bold">~1.2 detik</span> dengan algoritma TSP.</p>
+</div>
+</div>
+<button class="bg-secondary-fixed text-on-secondary-fixed font-bold px-xl py-md rounded-full shadow-md hover:scale-95 transition-transform duration-150 flex items-center gap-sm text-lg">
+                Jalankan Optimasi
+                <span class="material-symbols-outlined">play_arrow</span>
+</button>
+</div>
+</main>
+<!-- BottomNavBar Shell (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-sm bg-surface dark:bg-inverse-surface border-t border-outline-variant shadow-md rounded-t-xl">
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-label-md font-label-md">Stats</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-full px-4 py-1 scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined">map</span>
+<span class="text-label-md font-label-md">Routes</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">domain</span>
+<span class="text-label-md font-label-md">Schools</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="text-label-md font-label-md">Drivers</span>
+</button>
+</nav>
+</body></html>

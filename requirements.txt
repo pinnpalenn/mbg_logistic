@@ -1,0 +1,6 @@
+mysql-connector-python==9.1.0
+networkx
+osmnx
+scipy
+fastapi
+uvicorn

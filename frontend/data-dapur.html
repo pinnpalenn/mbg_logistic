@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Data Dapur — Sistem MBG</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    .data-layout { display:grid; grid-template-columns:360px 1fr; gap:20px; align-items:start; }
+    @media(max-width:900px){ .data-layout { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<div class="app-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🍱</div>
+      <div class="logo-text"><h3>Distribusi MBG</h3><span>Sistem Rute Optimal</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Menu Utama</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+      <a class="nav-item" href="optimasi.html"><span class="nav-icon">🗺️</span> Optimasi Rute</a>
+      <a class="nav-item" href="riwayat.html"><span class="nav-icon">📋</span> Riwayat Distribusi</a>
+      <div class="nav-label" style="margin-top:16px">Manajemen Data</div>
+      <a class="nav-item active" href="data-dapur.html"><span class="nav-icon">🏠</span> Data Dapur</a>
+      <a class="nav-item" href="data-sekolah.html"><span class="nav-icon">🏫</span> Data Sekolah</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar" id="userAvatar">A</div>
+        <div class="user-info"><div class="user-name" id="userName">Admin</div><div class="user-role">Administrator</div></div>
+      </div>
+      <a class="nav-item" href="#" id="logoutBtn" style="margin-top:4px"><span class="nav-icon">🚪</span> Keluar</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <h2 class="topbar-title">🏠 Manajemen Data Dapur</h2>
+    </header>
+
+    <main class="page">
+      <div class="mb-3">
+        <h1>Data Dapur MBG</h1>
+        <p>Kelola daftar Dapur Pusat yang menjadi titik keberangkatan distribusi.</p>
+      </div>
+
+      <div class="data-layout">
+
+        <!-- Form Tambah -->
+        <div class="card">
+          <h3 class="card-title mb-3">➕ Tambah Dapur Baru</h3>
+          <form id="formDapur">
+            <div class="form-group">
+              <label class="form-label">Nama Dapur *</label>
+              <input class="form-control" id="inputNama" placeholder="cth: Dapur MBG Cupak 1" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Latitude *</label>
+              <input class="form-control" id="inputLat" type="number" step="any" placeholder="cth: -1.608000" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Longitude *</label>
+              <input class="form-control" id="inputLng" type="number" step="any" placeholder="cth: 101.480000" required/>
+            </div>
+            <div class="text-sm text-muted mb-2" style="background:var(--bg-card2);padding:10px;border-radius:var(--radius-md);line-height:1.6">
+              💡 <strong>Tips:</strong> Klik langsung di peta sebelah kanan untuk otomatis mengisi koordinat. Atau klik kanan Google Maps → "What's here?".
+            </div>
+            <button class="btn btn-primary btn-block" type="submit" id="btnTambah">
+              <span id="btnTambahText">Simpan Dapur</span>
+              <span class="spinner hidden" id="btnSpinner"></span>
+            </button>
+          </form>
+          <div id="formMsg" class="mt-2 text-sm hidden"></div>
+        </div>
+
+        <!-- Daftar & Peta -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+
+          <!-- Map mini -->
+          <div class="card" style="padding:16px">
+            <h3 class="card-title mb-2">📍 Lokasi Dapur di Peta</h3>
+            <div id="map" style="height:260px"></div>
+          </div>
+
+          <!-- Tabel -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">📋 Daftar Dapur Terdaftar</h3>
+              <button class="btn btn-secondary btn-sm" id="btnRefresh">🔄</button>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr><th>ID</th><th>Nama Dapur</th><th>Koordinat</th><th>Aksi</th></tr>
+                </thead>
+                <tbody id="dapurTable">
+                  <tr><td colspan="4" class="text-center text-muted" style="padding:24px">Memuat...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="loading-overlay" id="deleteModal">
+  <div class="loading-box" style="text-align:left;min-width:340px">
+    <h3 style="margin-bottom:8px">⚠️ Hapus Dapur?</h3>
+    <p style="margin-bottom:16px">Dapur <strong id="deleteTarget"></strong> dan semua sekolah yang dialokasikan ke dapur ini akan terhapus.</p>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-secondary" id="cancelDelete">Batal</button>
+      <button class="btn btn-danger" id="confirmDelete">Hapus Sekarang</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/api.js"></script>
+<script>
+  if (!isLoggedIn()) window.location.href = 'index.html';
+
+  function showToast(msg, type = 'info') {
+    const tc = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<span>${{success:'✅',error:'❌',info:'ℹ️'}[type]||'ℹ️'}</span><span>${msg}</span>`;
+    tc.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  const user = JSON.parse(sessionStorage.getItem('mbg_user') || '{}');
+  document.getElementById('userName').textContent = user.username || 'Admin';
+  document.getElementById('userAvatar').textContent = (user.username || 'A')[0].toUpperCase();
+  document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout(); });
+
+  const map = L.map('map').setView([-1.608, 101.480], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 18 }).addTo(map);
+  let mapMarkers = [];
+
+  let deleteId = null;
+  let clickPin = null;
+
+  // Klik di peta untuk isi koordinat otomatis
+  map.on('click', function(e) {
+    const { lat, lng } = e.latlng;
+    document.getElementById('inputLat').value = lat.toFixed(6);
+    document.getElementById('inputLng').value = lng.toFixed(6);
+    if (clickPin) map.removeLayer(clickPin);
+    clickPin = L.marker([lat, lng], {
+      icon: L.divIcon({
+        html: `<div style="background:#F59E0B;color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.4)">+</div>`,
+        iconSize:[28,28],iconAnchor:[14,14],className:''
+      })
+    }).addTo(map).bindPopup(`📍 Posisi dipilih<br>${lat.toFixed(5)}, ${lng.toFixed(5)}`).openPopup();
+    showToast('📍 Koordinat terisi otomatis dari klik peta!', 'info');
+  });
+
+  async function loadData() {
+    const res = await getDapur();
+    const tbody = document.getElementById('dapurTable');
+    mapMarkers.forEach(m => map.removeLayer(m)); mapMarkers = [];
+
+    if (!res.data.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted" style="padding:24px">Belum ada data dapur.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = res.data.map(d => `
+      <tr>
+        <td><span class="badge badge-slate">${d.id_dapur}</span></td>
+        <td><strong>${d.nama_dapur}</strong></td>
+        <td class="text-sm text-muted">${parseFloat(d.latitude).toFixed(5)}, ${parseFloat(d.longitude).toFixed(5)}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="openDelete(${d.id_dapur},'${d.nama_dapur.replace(/'/g,'')}')">🗑️</button></td>
+      </tr>`).join('');
+
+    res.data.forEach(d => {
+      const icon = L.divIcon({
+        html: `<div style="background:#10B981;color:white;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:18px;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.4)">🏠</div>`,
+        iconSize:[34,34],iconAnchor:[17,17],className:''
+      });
+      const m = L.marker([d.latitude, d.longitude], { icon })
+        .bindPopup(`<strong>${d.nama_dapur}</strong>`)
+        .addTo(map);
+      mapMarkers.push(m);
+    });
+    if (mapMarkers.length) map.fitBounds(L.featureGroup(mapMarkers).getBounds(), { padding:[30,30] });
+  }
+
+  document.getElementById('formDapur').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btnTambah');
+    const spinner = document.getElementById('btnSpinner');
+    const btnText = document.getElementById('btnTambahText');
+    btn.disabled = true; spinner.classList.remove('hidden'); btnText.textContent = 'Menyimpan...';
+
+    try {
+      await addDapur({
+        nama_dapur: document.getElementById('inputNama').value.trim(),
+        latitude: parseFloat(document.getElementById('inputLat').value),
+        longitude: parseFloat(document.getElementById('inputLng').value),
+      });
+      showToast('Dapur berhasil ditambahkan!', 'success');
+      e.target.reset();
+      await loadData();
+    } catch (err) {
+      showToast('Gagal: ' + err.message, 'error');
+    } finally {
+      btn.disabled = false; spinner.classList.add('hidden'); btnText.textContent = 'Simpan Dapur';
+    }
+  });
+
+  function openDelete(id, nama) {
+    deleteId = id;
+    document.getElementById('deleteTarget').textContent = nama;
+    document.getElementById('deleteModal').classList.add('show');
+  }
+  document.getElementById('cancelDelete').addEventListener('click', () => {
+    deleteId = null; document.getElementById('deleteModal').classList.remove('show');
+  });
+  document.getElementById('confirmDelete').addEventListener('click', async () => {
+    if (!deleteId) return;
+    try {
+      await deleteDapur(deleteId);
+      showToast('Dapur dihapus', 'success');
+      document.getElementById('deleteModal').classList.remove('show');
+      deleteId = null; await loadData();
+    } catch (e) { showToast('Error: ' + e.message, 'error'); }
+  });
+
+  document.getElementById('btnRefresh').addEventListener('click', loadData);
+  loadData();
+</script>
+</body>
+</html>

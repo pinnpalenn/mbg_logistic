@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MBG Logistics - Schools Directory</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "error-container": "#ffdad6",
+                    "on-secondary-container": "#00714d",
+                    "secondary": "#006c49",
+                    "outline-variant": "#c5c5d3",
+                    "surface-tint": "#4059aa",
+                    "primary": "#00236f",
+                    "surface-bright": "#f8f9ff",
+                    "on-surface": "#0b1c30",
+                    "surface-container-highest": "#d3e4fe",
+                    "tertiary": "#3e2400",
+                    "tertiary-fixed": "#ffddb8",
+                    "on-primary-fixed-variant": "#264191",
+                    "surface-container-low": "#eff4ff",
+                    "primary-fixed-dim": "#b6c4ff",
+                    "on-background": "#0b1c30",
+                    "on-secondary-fixed": "#002113",
+                    "on-secondary-fixed-variant": "#005236",
+                    "surface-container": "#e5eeff",
+                    "on-primary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "on-tertiary": "#ffffff",
+                    "primary-container": "#1e3a8a",
+                    "tertiary-container": "#5c3800",
+                    "surface": "#f8f9ff",
+                    "on-tertiary-container": "#ef9900",
+                    "surface-container-high": "#dce9ff",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-on-surface": "#eaf1ff",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "on-primary-fixed": "#00164e",
+                    "secondary-container": "#6cf8bb",
+                    "surface-dim": "#cbdbf5",
+                    "on-error-container": "#93000a",
+                    "outline": "#757682",
+                    "surface-variant": "#d3e4fe",
+                    "on-primary-container": "#90a8ff",
+                    "on-tertiary-fixed": "#2a1700",
+                    "inverse-primary": "#b6c4ff",
+                    "inverse-surface": "#213145",
+                    "background": "#f8f9ff",
+                    "primary-fixed": "#dce1ff",
+                    "secondary-fixed-dim": "#4edea3",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#6ffbbe",
+                    "on-surface-variant": "#444651"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "md": "16px",
+                    "xl": "32px",
+                    "sm": "8px",
+                    "xs": "4px",
+                    "gutter": "20px",
+                    "unit": "4px",
+                    "margin": "24px",
+                    "lg": "24px"
+            },
+            "fontFamily": {
+                    "h3": ["Inter"],
+                    "data-mono": ["Inter"],
+                    "h2": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "label-md": ["Inter"],
+                    "h1": ["Inter"],
+                    "body-md": ["Inter"],
+                    "body-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "h3": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "data-mono": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                    "h2": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-md": ["13px", {"lineHeight": "18px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "h1": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { background-color: #f8f9ff; font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(8px); border: 1px solid #E2E8F0; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-margin h-16 bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline fixed top-0 z-50">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary dark:text-inverse-primary cursor-pointer">menu</span>
+<span class="text-h2 font-h2 font-bold text-primary dark:text-primary-fixed-dim">MBG Logistics</span>
+</div>
+<div class="flex items-center gap-md">
+<nav class="hidden md:flex gap-lg items-center mr-lg">
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors px-3 py-2 rounded-lg font-label-md text-label-md" href="#">Stats</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors px-3 py-2 rounded-lg font-label-md text-label-md" href="#">Routes</a>
+<a class="text-primary dark:text-primary-fixed-dim font-bold font-label-md text-label-md" href="#">Schools</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors px-3 py-2 rounded-lg font-label-md text-label-md" href="#">Drivers</a>
+</nav>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container">
+<img alt="User profile photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDeq41FnnfKwlZu3SQimpqdX_Jakvo_-8RfabFGqsv74q_QhlQNQrGvFN3wdaMXytuzHj8yo1-ZGopOwaU9E3uLVzKj3Wi5cfmbsXdpFzq9RrpcVqazmRiW21zG6W-pvtvcye_jFFKp9sSXNWTaWem6qPQr0rD2ct_LzGYVCyCB-oKCB7nwB3NnPi56da2zEngA6eIkaMcRIi1p3WmMjwreGtXmxZe-sFDuvxCiRV5zlxZ2FBARWaivh2CfZSmYhmHjMNQ-RoA73R8"/>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-32 px-margin max-w-7xl mx-auto">
+<!-- Header & Search Section -->
+<section class="mb-xl">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-md mb-lg">
+<div>
+<h1 class="text-h1 font-h1 text-primary mb-xs">Recipient Schools</h1>
+<p class="text-body-lg font-body-lg text-on-surface-variant">Monitoring MBG distribution for 124 partner institutions.</p>
+</div>
+<div class="flex flex-col sm:flex-row gap-sm w-full md:w-auto">
+<div class="relative flex-grow">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none text-body-md font-body-md" placeholder="Search school name or ID..." type="text"/>
+</div>
+<button class="flex items-center justify-center gap-xs px-lg py-2 bg-primary text-on-primary font-label-md text-label-md rounded-xl hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-[20px]">filter_list</span>
+                        Filters
+                    </button>
+</div>
+</div>
+<!-- Status Quick Filters -->
+<div class="flex gap-sm overflow-x-auto pb-2 scrollbar-hide">
+<button class="px-md py-2 bg-primary text-on-primary rounded-full font-label-md text-label-md whitespace-nowrap">All Schools</button>
+<button class="px-md py-2 bg-surface-container-high text-on-surface-variant rounded-full font-label-md text-label-md whitespace-nowrap hover:bg-secondary-container hover:text-on-secondary-container transition-colors">Delivered Today (86)</button>
+<button class="px-md py-2 bg-surface-container-high text-on-surface-variant rounded-full font-label-md text-label-md whitespace-nowrap hover:bg-error-container hover:text-on-error-container transition-colors">Pending Arrival (38)</button>
+</div>
+</section>
+<!-- Schools Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- School Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-md border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-md">
+<div class="p-sm bg-primary-container text-on-primary-container rounded-lg">
+<span class="material-symbols-outlined">school</span>
+</div>
+<span class="px-sm py-1 rounded-full text-[11px] font-bold tracking-wider uppercase bg-secondary-container text-on-secondary-container">DELIVERED</span>
+</div>
+<h3 class="text-h3 font-h3 text-on-surface mb-xs">Global Mandiri Primary</h3>
+<div class="space-y-sm mb-lg">
+<div class="flex items-start gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span class="text-body-sm font-body-sm">Jl. Kebon Jeruk No. 12, Jakarta Barat</span>
+</div>
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">person</span>
+<span class="text-body-sm font-body-sm">Bpk. Ahmad Subarjo (Principal)</span>
+</div>
+</div>
+<div class="pt-md border-t border-outline-variant flex justify-between items-center">
+<div>
+<p class="text-label-md font-label-md text-outline">DAILY PORTIONS</p>
+<p class="text-h3 font-h3 text-primary">450</p>
+</div>
+<button class="p-sm text-primary hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- School Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-md border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-md">
+<div class="p-sm bg-primary-container text-on-primary-container rounded-lg">
+<span class="material-symbols-outlined">school</span>
+</div>
+<span class="px-sm py-1 rounded-full text-[11px] font-bold tracking-wider uppercase bg-error-container text-on-error-container">PENDING</span>
+</div>
+<h3 class="text-h3 font-h3 text-on-surface mb-xs">Harapan Bangsa Secondary</h3>
+<div class="space-y-sm mb-lg">
+<div class="flex items-start gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span class="text-body-sm font-body-sm">Kawasan Industri Pulogadung, Jakarta Timur</span>
+</div>
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">person</span>
+<span class="text-body-sm font-body-sm">Ibu Siti Nurhaliza (Kitchen Lead)</span>
+</div>
+</div>
+<div class="pt-md border-t border-outline-variant flex justify-between items-center">
+<div>
+<p class="text-label-md font-label-md text-outline">DAILY PORTIONS</p>
+<p class="text-h3 font-h3 text-primary">1,200</p>
+</div>
+<button class="p-sm text-primary hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- School Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-md border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-md">
+<div class="p-sm bg-primary-container text-on-primary-container rounded-lg">
+<span class="material-symbols-outlined">school</span>
+</div>
+<span class="px-sm py-1 rounded-full text-[11px] font-bold tracking-wider uppercase bg-secondary-container text-on-secondary-container">DELIVERED</span>
+</div>
+<h3 class="text-h3 font-h3 text-on-surface mb-xs">Cahaya Ilmu Kindergarten</h3>
+<div class="space-y-sm mb-lg">
+<div class="flex items-start gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span class="text-body-sm font-body-sm">Jl. Melati Raya No. 45, Tangerang</span>
+</div>
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">person</span>
+<span class="text-body-sm font-body-sm">Bpk. Rudi Hermawan (Admin)</span>
+</div>
+</div>
+<div class="pt-md border-t border-outline-variant flex justify-between items-center">
+<div>
+<p class="text-label-md font-label-md text-outline">DAILY PORTIONS</p>
+<p class="text-h3 font-h3 text-primary">185</p>
+</div>
+<button class="p-sm text-primary hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Map Integration (Bento Style Card) -->
+<div class="lg:col-span-2 bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden flex flex-col min-h-[300px]">
+<div class="p-md border-b border-outline-variant flex justify-between items-center">
+<h3 class="font-h3 text-h3">Regional Coverage</h3>
+<div class="flex gap-xs">
+<span class="flex items-center gap-1 text-[12px] font-medium"><span class="w-2 h-2 rounded-full bg-secondary"></span> Online</span>
+</div>
+</div>
+<div class="flex-grow relative bg-surface-dim">
+<img alt="Logistics coverage map showing schools" class="w-full h-full object-cover grayscale opacity-60" data-location="Jakarta" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAupjY4ie5fYYAsrjMJrmCwZXYKphgaCBsO2BgQZ0VBtfCmHfvbmvrf3KaMBHy9yFEaGVHKDJVPEwxe3vbl34o2xIN7iUtIjM6z8cJzMNrC03dv-_6yFqIJBi-82yrqkkOg0eqgMvnITX2MlhpTFSIwbyoZUQ4-v-__oMiv-fz0RGSpn4BF-sudoPPVwsJmgOLEit5Ttt3H-j1v3cXvcUjxoLCYnmnchJCORGqLef7M1B6hzoxlJtYm7AkZYAGvKO7QJiHx8k7PVa8"/>
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<div class="bg-primary text-on-primary px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">location_searching</span>
+<span class="text-label-md font-label-md">Viewing Jakarta Hub</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Stats Mini Card -->
+<div class="bg-primary-container text-on-primary-container rounded-xl p-md flex flex-col justify-between">
+<div>
+<span class="material-symbols-outlined text-[32px] mb-sm">trending_up</span>
+<h4 class="text-h3 font-h3">Today's Reach</h4>
+<p class="text-body-sm opacity-80">Distribution efficiency is up 12% from yesterday.</p>
+</div>
+<div class="mt-xl">
+<p class="text-[48px] font-bold leading-none">94.2%</p>
+<p class="text-label-md font-label-md opacity-70">On-time Delivery Rate</p>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Visible on Mobile) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-sm bg-surface dark:bg-inverse-surface border-t border-outline-variant dark:border-outline md:hidden shadow-md rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-label-md font-label-md">Stats</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim" href="#">
+<span class="material-symbols-outlined">map</span>
+<span class="text-label-md font-label-md">Routes</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-full px-4 py-1 scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">domain</span>
+<span class="text-label-md font-label-md">Schools</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim" href="#">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="text-label-md font-label-md">Drivers</span>
+</a>
+</nav>
+</body></html>

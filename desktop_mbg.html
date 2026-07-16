@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard MBG Logistik - Admin Panel</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --sidebar-bg: #0f172a;
+            --sidebar-hover: #1e293b;
+            --sidebar-active: #3b82f6;
+            --bg-color: #f1f5f9;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --primary: #3b82f6;
+            --secondary: #10b981;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-header {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: #0b1121;
+        }
+        .sidebar-header h2 { font-size: 20px; font-weight: 800; background: linear-gradient(to right, #60a5fa, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .sidebar-menu { flex: 1; padding: 24px 16px; overflow-y: auto; }
+        .menu-label { font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 12px; margin-left: 16px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .menu-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 16px; margin-bottom: 8px;
+            border-radius: 12px; cursor: pointer;
+            color: #94a3b8; font-weight: 600; font-size: 15px;
+            transition: all 0.2s;
+        }
+        .menu-item:hover { background: var(--sidebar-hover); color: #fff; }
+        .menu-item.active { background: var(--sidebar-active); color: #fff; box-shadow: 0 4px 15px rgba(59,130,246,0.3); }
+        .menu-item i { font-size: 22px; }
+        
+        .sidebar-footer {
+            padding: 24px; border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .user-profile {
+            display: flex; align-items: center; gap: 12px; cursor: pointer;
+            padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.05);
+        }
+        .user-profile:hover { background: rgba(255,255,255,0.1); }
+        
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            flex: 1; display: flex; flex-direction: column; overflow: hidden;
+        }
+        
+        /* HEADER */
+        .top-header {
+            height: 76px; background: var(--surface);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 32px; border-bottom: 1px solid var(--border);
+            flex-shrink: 0; z-index: 10;
+        }
+        .header-search {
+            display: flex; align-items: center; gap: 10px;
+            background: var(--bg-color); padding: 10px 16px; border-radius: 20px;
+            width: 350px; border: 1px solid var(--border);
+        }
+        .header-search input {
+            border: none; background: transparent; width: 100%; outline: none;
+            font-family: 'Outfit'; font-size: 14px; color: var(--text-main);
+        }
+        
+        /* CONTENT AREA */
+        .content-area {
+            flex: 1; padding: 32px; overflow-y: auto; position: relative;
+        }
+        
+        /* SCREEN MANAGEMENT */
+        .screen { display: none; animation: fadeIn 0.4s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- UI COMPONENTS --- */
+        .page-title { font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+        .page-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; }
+        
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 24px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 24px; }
+        .grid-2-sidebar { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+        
+        .card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        }
+        .card-title { font-size: 16px; font-weight: 800; color: #1e293b; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .stat-val { font-size: 32px; font-weight: 800; color: #1e293b; margin-bottom: 4px; }
+        .stat-label { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; }
+        
+        .badge {
+            padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 800;
+        }
+        .badge-green { background: #d1fae5; color: #059669; }
+        .badge-blue { background: #e0e7ff; color: #4f46e5; }
+        .badge-yellow { background: #fef3c7; color: #d97706; }
+        .badge-red { background: #fee2e2; color: #dc2626; }
+        
+        /* TABLE */
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { padding: 16px; font-size: 12px; font-weight: 800; color: #64748b; border-bottom: 1px solid var(--border); text-transform: uppercase; }
+        td { padding: 16px; font-size: 14px; border-bottom: 1px solid var(--border); font-weight: 500; }
+        tbody tr:hover { background: #f8fafc; }
+        
+        /* CUSTOM MAP LAYOUT */
+        #map-desktop { height: 100%; width: 100%; border-radius: 16px; z-index: 1; }
+        .map-wrapper { height: 600px; position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        
+        /* ROUTE LIST */
+        .route-item {
+            background: #fff; border: 1px solid var(--border); border-radius: 12px;
+            padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 16px;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .route-item:hover { border-color: var(--primary); transform: translateX(5px); }
+        .route-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 20px; flex-shrink: 0; }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #4f46e5); color: #fff;
+            border: none; border-radius: 12px; padding: 16px 24px; font-family: 'Outfit'; font-size: 15px; font-weight: 800; cursor: pointer; width: 100%;
+            box-shadow: 0 10px 20px rgba(59,130,246,0.3); transition: all 0.2s;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(59,130,246,0.4); }
+
+    </style>
+</head>
+<body>
+
+    <!-- ==================== SIDEBAR ==================== -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #3b82f6, #4f46e5); border-radius: 10px; display: flex; justify-content: center; align-items: center;">
+                <i class="ph-fill ph-truck" style="color: #fff; font-size: 20px;"></i>
+            </div>
+            <h2>MBG Logistik</h2>
+        </div>
+        
+        <div class="sidebar-menu">
+            <div class="menu-label">Menu Utama</div>
+            <div class="menu-item active" onclick="switchTab('analitik', this)">
+                <i class="ph ph-chart-line-up"></i> Dashboard Analitik
+            </div>
+            <div class="menu-item" onclick="switchTab('rute', this)">
+                <i class="ph ph-map-trifold"></i> Optimasi Rute
+            </div>
+            
+            <div class="menu-label" style="margin-top: 24px;">Manajemen Data</div>
+            <div class="menu-item" onclick="switchTab('dapur', this)">
+                <i class="ph ph-cooking-pot"></i> Data Dapur Pusat
+            </div>
+            <div class="menu-item" onclick="switchTab('sekolah', this)">
+                <i class="ph ph-buildings"></i> Data Sekolah
+            </div>
+            <div class="menu-item" onclick="switchTab('riwayat', this)">
+                <i class="ph ph-clock-clockwise"></i> Riwayat Pengiriman
+            </div>
+        </div>
+        
+        <div class="sidebar-footer">
+            <div class="user-profile" onclick="showProfileModal()">
+                <img src="https://ui-avatars.com/api/?name=Admin+Pusat&background=3b82f6&color=fff" style="width: 40px; height: 40px; border-radius: 10px;">
+                <div>
+                    <div style="font-size: 14px; font-weight: 800;">Admin Pusat</div>
+                    <div style="font-size: 12px; color: #94a3b8;">Super Administrator</div>
+                </div>
+                <i class="ph ph-caret-right" style="margin-left: auto; font-size: 16px; color: #64748b;"></i>
+            </div>
+        </div>
+
+        <!-- MODAL PROFIL ADMIN -->
+        <div id="modal-profil" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+            <div style="background:#fff; border-radius:20px; padding:32px; width:400px; box-shadow:0 20px 60px rgba(0,0,0,0.3); font-family:'Outfit';">
+                <div style="text-align:center; margin-bottom:24px;">
+                    <img src="https://ui-avatars.com/api/?name=Admin+Pusat&background=3b82f6&color=fff&size=80" style="width:80px; height:80px; border-radius:20px; margin-bottom:12px;">
+                    <div style="font-size:22px; font-weight:800; color:#1e293b;">Admin Pusat</div>
+                    <div style="font-size:13px; color:#64748b;">Super Administrator — MBG Logistik</div>
+                </div>
+                <div style="border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin-bottom:16px;">
+                    <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f1f5f9; font-size:13px;"><span style="color:#64748b;">Email</span><span style="font-weight:700;">admin@mbglogistik.id</span></div>
+                    <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f1f5f9; font-size:13px;"><span style="color:#64748b;">Role</span><span style="font-weight:700; color:#3b82f6;">Super Admin</span></div>
+                    <div style="display:flex; justify-content:space-between; padding:8px 0; font-size:13px;"><span style="color:#64748b;">Terakhir Login</span><span style="font-weight:700;">Hari ini, 07.00 WIB</span></div>
+                </div>
+                <div style="display:flex; gap:12px;">
+                    <button onclick="document.getElementById('modal-profil').style.display='none'" style="flex:1; padding:14px; border-radius:12px; border:1px solid #e2e8f0; background:#fff; font-family:'Outfit'; font-weight:700; cursor:pointer;">Tutup</button>
+                    <button onclick="showToast('🚪 Logout berhasil. Sampai jumpa!', '#ef4444'); setTimeout(()=> document.getElementById(\"modal-profil\").style.display=\"none\", 1000)" style="flex:1; padding:14px; border-radius:12px; border:none; background:#ef4444; color:#fff; font-family:'Outfit'; font-weight:700; cursor:pointer;">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <div class="main-content">
+        
+        <!-- HEADER -->
+        <div class="top-header">
+            <div class="header-search">
+                <i class="ph ph-magnifying-glass" style="color: #94a3b8; font-size: 20px;"></i>
+                <input type="text" placeholder="Cari ID Rute, Dapur, atau Nama Sopir...">
+            </div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <button onclick="showToast('📊 Laporan berhasil diekspor ke format Excel!', '#10b981')" style="background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 10px 16px; font-family: 'Outfit'; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition:all 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">
+                    <i class="ph ph-download-simple"></i> Ekspor Laporan
+                </button>
+                <div id="bell-btn" onclick="switchTab('riwayat', document.querySelectorAll('.menu-item')[4])" style="position: relative; cursor: pointer; padding: 6px;">
+                    <i class="ph ph-bell" style="font-size: 24px; color: #64748b;"></i>
+                    <div id="bell-badge" style="position: absolute; top: -2px; right: 0; width: 10px; height: 10px; background: #ef4444; border-radius: 50%; border: 2px solid #fff;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTENT AREA -->
+        <div class="content-area">
+            
+            <!-- SCREEN: ANALITIK -->
+            <div id="screen-analitik" class="screen active">
+                <div class="page-title">Dashboard Analitik</div>
+                <div class="page-subtitle">Ikhtisar efisiensi operasional dan performa pengiriman Program MBG</div>
+                
+                <div class="grid-4">
+                    <div class="card" onclick="switchTab('sekolah', document.querySelectorAll('.menu-item')[3])" style="border-left: 4px solid #3b82f6; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+                        <div class="stat-label">Total Sekolah Dilayani</div>
+                        <div class="stat-val">19</div>
+                        <div class="badge badge-blue">Klik → Lihat Data Sekolah</div>
+                    </div>
+                    <div class="card" onclick="switchTab('rute', document.querySelectorAll('.menu-item')[1])" style="border-left: 4px solid #10b981; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+                        <div class="stat-label">Penghematan BBM</div>
+                        <div class="stat-val">Rp 12.4M</div>
+                        <div style="font-size: 12px; font-weight: 700; color: #10b981;"><i class="ph ph-trend-up"></i> Klik → Lihat Optimasi Rute</div>
+                    </div>
+                    <div class="card" onclick="switchTab('riwayat', document.querySelectorAll('.menu-item')[4])" style="border-left: 4px solid #f59e0b; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+                        <div class="stat-label">Status Pengiriman Sukses</div>
+                        <div class="stat-val">98.4%</div>
+                        <div style="font-size: 12px; font-weight: 700; color: #10b981;"><i class="ph ph-trend-up"></i> Klik → Lihat Riwayat</div>
+                    </div>
+                    <div class="card" onclick="switchTab('dapur', document.querySelectorAll('.menu-item')[2])" style="border-left: 4px solid #8b5cf6; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+                        <div class="stat-label">Rata-Rata Waktu / Rute</div>
+                        <div class="stat-val">42 Min</div>
+                        <div style="font-size: 12px; font-weight: 700; color: #8b5cf6;"><i class="ph ph-cooking-pot"></i> Klik → Data Dapur</div>
+                    </div>
+                </div>
+                
+                <div class="grid-2-sidebar">
+                    <!-- Chart -->
+                    <div class="card">
+                        <div class="card-title">Tren Pengiriman Harian (Sukses vs Gagal)</div>
+                        <div style="position: relative; height: 300px; width: 100%;">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+                    <!-- Efisiensi Wilayah -->
+                    <div class="card">
+                        <div class="card-title">Efisiensi Rute per Kecamatan</div>
+                        <div style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; margin-bottom: 8px;"><span>Gunung Talang</span> <span style="color: #3b82f6;">92%</span></div>
+                            <div style="height: 10px; background: #f1f5f9; border-radius: 5px; overflow: hidden;"><div style="width: 92%; height: 100%; background: #3b82f6;"></div></div>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; margin-bottom: 8px;"><span>Kubung</span> <span style="color: #3b82f6;">89%</span></div>
+                            <div style="height: 10px; background: #f1f5f9; border-radius: 5px; overflow: hidden;"><div style="width: 89%; height: 100%; background: #3b82f6;"></div></div>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; margin-bottom: 8px;"><span>Lembang Jaya</span> <span style="color: #3b82f6;">88%</span></div>
+                            <div style="height: 10px; background: #f1f5f9; border-radius: 5px; overflow: hidden;"><div style="width: 88%; height: 100%; background: #3b82f6;"></div></div>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; margin-bottom: 8px;"><span>Bukit Sundi</span> <span style="color: #f59e0b;">78%</span></div>
+                            <div style="height: 10px; background: #f1f5f9; border-radius: 5px; overflow: hidden;"><div style="width: 78%; height: 100%; background: #f59e0b;"></div></div>
+                        </div>
+                        
+                        <div onclick="switchTab('rute', document.querySelectorAll('.menu-item')[1])" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 16px; font-size: 13px; color: #1e3a8a; font-weight: 600; line-height: 1.5; margin-top: 32px; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+                            <i class="ph-fill ph-info" style="font-size: 18px; float: left; margin-right: 8px; margin-top: 2px;"></i>
+                            Algoritma Dijkstra & TSP merekomendasikan penambahan unit armada untuk wilayah Bukit Sundi. <b>Klik untuk buka Optimasi Rute →</b>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCREEN: OPTIMASI RUTE -->
+            <div id="screen-rute" class="screen">
+                <div class="page-title">Sistem Optimasi Rute (Dijkstra + TSP)</div>
+                <div class="page-subtitle">Kalkulasi jalur pengiriman terpendek untuk efisiensi BBM dan waktu ketibaan</div>
+                
+                <div class="grid-2-sidebar" style="grid-template-columns: 2fr 1.2fr;">
+                    <!-- Kiri: Peta Leaflet -->
+                    <div class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+                        <div style="padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #fff; z-index: 2;">
+                            <div style="font-weight: 800; font-size: 16px;">Visualisasi Pemetaan Rute</div>
+                            <div class="badge badge-green" id="rute-status-badge"><i class="ph-fill ph-check-circle"></i> Rute Optimal Ditemukan</div>
+                        </div>
+                        <div class="map-wrapper" style="border: none; border-radius: 0; flex: 1;">
+                            <div id="map-desktop"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kanan: Kontrol & List Rute -->
+                    <div class="card">
+                        <div class="card-title">Parameter Optimasi</div>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="font-size: 13px; font-weight: 700; color: #64748b; margin-bottom: 8px; display: block;">PILIH TITIK AWAL (DAPUR PUSAT)</label>
+                            <select id="dapur-select" onchange="changeDapurRoute()" style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border); font-family: 'Outfit'; font-size: 15px; font-weight: 600; background: #f8fafc; cursor: pointer; outline: none;">
+                                <option value="0">Dapur SPPG HULLER MAMA</option>
+                                <option value="1">Dapur YAYASAN MITRA NUSA</option>
+                                <option value="2">Dapur MAN AMAL</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 24px;">
+                            <label style="font-size: 13px; font-weight: 700; color: #64748b; margin-bottom: 8px; display: block;">PENUGASAN SUPIR</label>
+                            <select id="driver-select" style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border); font-family: 'Outfit'; font-size: 15px; font-weight: 600; background: #f8fafc; cursor: pointer; outline: none;">
+                                <!-- Diisi oleh JS -->
+                            </select>
+                        </div>
+                        
+                        <hr style="border: 0; border-top: 1px dashed var(--border); margin: 24px 0;">
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <div class="card-title" style="margin: 0;">Urutan Hasil Optimasi</div>
+                            <div class="badge badge-blue" id="rute-count">4 Titik</div>
+                        </div>
+                        
+                        <div id="route-list" style="max-height: 350px; overflow-y: auto; padding-right: 8px;">
+                            <!-- Diisi oleh JS -->
+                        </div>
+                        
+                        <button class="btn-primary" onclick="mulaiRute()" style="margin-top: 24px;">
+                            <i class="ph-fill ph-rocket" style="font-size: 20px; vertical-align: bottom;"></i> Eksekusi & Tugaskan Supir
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCREEN: DAPUR -->
+            <div id="screen-dapur" class="screen">
+                <div class="page-title">Data Dapur Pusat (SPPG)</div>
+                <div class="page-subtitle">Manajemen kapasitas produksi dan armada logistik</div>
+                
+                <div class="grid-3">
+                    <!-- Dapur 1: SPPG HULLER MAMA -->
+                    <div class="card" onclick="openDapurDetail(0)" style="cursor: pointer; transition: all 0.25s; border: 2px solid transparent;" onmouseover="this.style.borderColor='#3b82f6'; this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 30px rgba(59,130,246,0.15)'" onmouseout="this.style.borderColor='transparent'; this.style.transform=''; this.style.boxShadow=''">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+                            <div style="width: 50px; height: 50px; background: #e0e7ff; border-radius: 12px; display: flex; justify-content: center; align-items: center; color: #3b82f6;"><i class="ph-fill ph-cooking-pot" style="font-size: 28px;"></i></div>
+                            <div class="badge badge-green">Aktif Memasak</div>
+                        </div>
+                        <div style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 4px;">SPPG HULLER MAMA</div>
+                        <div style="font-size: 13px; color: #64748b; margin-bottom: 20px;"><i class="ph ph-map-pin"></i> Jl. Lintas Sumatera, Guntal</div>
+                        
+                        <div style="font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 8px;">TARGET PORSI HARIAN</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; font-weight: 600;">
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 4px;"><span>Senin</span> <span>1.020 Porsi</span></div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 4px;"><span>Kamis</span> <span>1.020 Porsi</span></div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 4px;"><span>Selasa</span> <span>1.020 Porsi</span></div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 4px;"><span>Jumat</span> <span>1.020 Porsi</span></div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 4px;"><span>Rabu</span> <span>1.020 Porsi</span></div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 4px;"><span>Sabtu</span> <span style="color: #d97706;">Paket Kering</span></div>
+                        </div>
+                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 11px; font-weight: 700; display: flex; justify-content: space-between; align-items: center;">
+                            <div><span style="color: #94a3b8;">ARMADA:</span> <span style="color: #1e293b;">3 L300 Box</span></div>
+                            <span style="color: #3b82f6; font-size: 12px;">Lihat Detail <i class="ph ph-arrow-right"></i></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Dapur 2: YAYASAN MITRA NUSA -->
+                    <div class="card" onclick="openDapurDetail(1)" style="cursor: pointer; transition: all 0.25s; border: 2px solid transparent;" onmouseover="this.style.borderColor='#3b82f6'; this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 30px rgba(59,130,246,0.15)'" onmouseout="this.style.borderColor='transparent'; this.style.transform=''; this.style.boxShadow=''">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+                            <div style="width: 50px; height: 50px; background: #e0e7ff; border-radius: 12px; display: flex; justify-content: center; align-items: center; color: #3b82f6;"><i class="ph-fill ph-cooking-pot" style="font-size: 28px;"></i></div>
+                            <div class="badge badge-green">Aktif Memasak</div>
+                        </div>
+                        <div style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 4px;">YAYASAN MITRA NUSA</div>
+                        <div style="font-size: 13px; color: #64748b; margin-bottom: 20px;"><i class="ph ph-map-pin"></i> Kec. Kubung, Kab. Solok</div>
+                        
+                        <div style="font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 8px;">TARGET PORSI HARIAN</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; font-weight: 600;">
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 4px;"><span>Senin</span> <span>2.026 Porsi</span></div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 4px;"><span>Kamis</span> <span>2.026 Porsi</span></div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 4px;"><span>Selasa</span> <span>1.800 Porsi</span></div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 4px;"><span>Jumat</span> <span>1.800 Porsi</span></div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 4px;"><span>Rabu</span> <span>1.800 Porsi</span></div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 4px;"><span>Sabtu</span> <span style="color: #d97706;">Paket Kering</span></div>
+                        </div>
+                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 11px; font-weight: 700; display: flex; justify-content: space-between; align-items: center;">
+                            <div><span style="color: #94a3b8;">ARMADA:</span> <span style="color: #1e293b;">5 L300 Box</span></div>
+                            <span style="color: #3b82f6; font-size: 12px;">Lihat Detail <i class="ph ph-arrow-right"></i></span>
+                        </div>
+                    </div>
+
+                    <!-- Dapur 3: MAN AMAL -->
+                    <div class="card" onclick="openDapurDetail(2)" style="cursor: pointer; transition: all 0.25s; border: 2px solid transparent;" onmouseover="this.style.borderColor='#f59e0b'; this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 30px rgba(245,158,11,0.15)'" onmouseout="this.style.borderColor='transparent'; this.style.transform=''; this.style.boxShadow=''">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+                            <div style="width: 50px; height: 50px; background: #fef3c7; border-radius: 12px; display: flex; justify-content: center; align-items: center; color: #d97706;"><i class="ph-fill ph-cooking-pot" style="font-size: 28px;"></i></div>
+                            <div class="badge badge-yellow">Pemeliharaan</div>
+                        </div>
+                        <div style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 4px;">DAPUR MAN AMAL</div>
+                        <div style="font-size: 13px; color: #64748b; margin-bottom: 20px;"><i class="ph ph-map-pin"></i> Kec. Bukit Sundi, Kab. Solok</div>
+                        
+                        <div style="font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 8px;">TARGET PORSI HARIAN</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; font-weight: 600;">
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 4px;"><span>Senin</span> <span>2.026 Porsi</span></div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 4px;"><span>Kamis</span> <span>2.026 Porsi</span></div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 4px;"><span>Selasa</span> <span>1.800 Porsi</span></div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 4px;"><span>Jumat</span> <span>1.800 Porsi</span></div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 4px;"><span>Rabu</span> <span>1.800 Porsi</span></div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 4px;"><span>Sabtu</span> <span style="color: #d97706;">Paket Kering</span></div>
+                        </div>
+                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 11px; font-weight: 700; display: flex; justify-content: space-between; align-items: center;">
+                            <div><span style="color: #94a3b8;">ARMADA:</span> <span style="color: #1e293b;">2 L300 Box</span></div>
+                            <span style="color: #f59e0b; font-size: 12px;">Lihat Detail <i class="ph ph-arrow-right"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCREEN: DETAIL DAPUR -->
+            <div id="screen-detail-dapur" class="screen">
+                <!-- Tombol Kembali -->
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+                    <button onclick="switchTab('dapur', document.querySelector('.menu-item:nth-child(3)'))" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 16px; font-family: 'Outfit'; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                        <i class="ph ph-arrow-left"></i> Kembali ke Data Dapur
+                    </button>
+                    <div id="detail-breadcrumb" style="font-size: 13px; color: #64748b;">Data Dapur > <span id="detail-nama-singkat" style="color: #1e293b; font-weight: 700;"></span></div>
+                </div>
+
+                <!-- Header Hero Dapur -->
+                <div id="detail-hero" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border-radius: 20px; padding: 32px; color: #fff; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 12px; font-weight: 700; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Detail Operasional Dapur</div>
+                        <div id="detail-nama" style="font-size: 28px; font-weight: 800; margin-bottom: 6px;"></div>
+                        <div id="detail-alamat" style="font-size: 14px; opacity: 0.8;"><i class="ph ph-map-pin"></i> </div>
+                        <div id="detail-status-badge" style="display: inline-block; margin-top: 12px; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800;"></div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 48px; font-weight: 900; line-height: 1;" id="detail-porsi-hari-ini"></div>
+                        <div style="font-size: 13px; font-weight: 700; opacity: 0.7; margin-top: 4px;">Porsi Target Hari Ini</div>
+                        <div id="detail-armada-hero" style="font-size: 13px; font-weight: 700; margin-top: 6px; opacity: 0.8;"></div>
+                    </div>
+                </div>
+
+                <!-- Grid Konten Detail -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+
+                    <!-- Kiri: Progress Produksi -->
+                    <div class="card">
+                        <div class="card-title"><span><i class="ph-fill ph-flame" style="color: #ef4444;"></i> Progress Produksi Hari Ini</span> <span id="detail-persen" style="font-size: 14px; color: #10b981;"></span></div>
+                        <div style="margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 8px;">
+                                <span>Selesai Dimasak</span>
+                                <span id="detail-progress-text"></span>
+                            </div>
+                            <div style="height: 14px; background: #f1f5f9; border-radius: 20px; overflow: hidden;">
+                                <div id="detail-progress-bar" style="height: 100%; border-radius: 20px; background: linear-gradient(to right, #10b981, #3b82f6); transition: width 1.5s ease;"></div>
+                            </div>
+                        </div>
+                        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 14px; font-size: 13px; font-weight: 600; color: #065f46; margin-top: 16px;">
+                            <i class="ph-fill ph-timer" style="font-size: 18px; vertical-align: bottom; margin-right: 6px;"></i>
+                            <span id="detail-estimasi"></span>
+                        </div>
+
+                        <div style="margin-top: 20px;">
+                            <div class="card-title" style="font-size: 14px;"><i class="ph-fill ph-fork-knife" style="color: #f59e0b;"></i> Menu Hari Ini</div>
+                            <div id="detail-menu" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Kanan: Stok Bahan Baku -->
+                    <div class="card">
+                        <div class="card-title"><i class="ph-fill ph-package" style="color: #8b5cf6;"></i> Inventaris Bahan Baku</div>
+                        <div id="detail-stok" style="display: flex; flex-direction: column; gap: 14px;"></div>
+                    </div>
+                </div>
+
+                <!-- Baris 2: Armada Supir + Sekolah Tanggungan -->
+                <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px;">
+                    <!-- Armada & Supir -->
+                    <div class="card">
+                        <div class="card-title"><i class="ph-fill ph-truck" style="color: #3b82f6;"></i> Status Armada & Supir</div>
+                        <div id="detail-armada" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                    </div>
+
+                    <!-- Sekolah Tanggungan -->
+                    <div class="card">
+                        <div class="card-title"><i class="ph-fill ph-buildings" style="color: #10b981;"></i> Sekolah Tanggungan & Status Pengiriman</div>
+                        <table style="width: 100%; font-size: 13px;">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: left; padding: 8px 4px; color: #64748b; font-size: 11px;">Sekolah</th>
+                                    <th style="text-align: center; padding: 8px 4px; color: #64748b; font-size: 11px;">Porsi</th>
+                                    <th style="text-align: center; padding: 8px 4px; color: #64748b; font-size: 11px;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detail-sekolah"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCREEN: RIWAYAT -->
+            <div id="screen-riwayat" class="screen">
+                <div class="page-title">Riwayat Pengiriman & Log Logistik</div>
+                <div class="page-subtitle">Rekam jejak ketepatan waktu pengiriman makanan ke sekolah</div>
+                
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID Rute</th>
+                                <th>Tanggal & Jam</th>
+                                <th>Dapur Asal</th>
+                                <th>Sekolah Tujuan</th>
+                                <th>Porsi</th>
+                                <th>Sopir</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-riwayat-body">
+                            <!-- Populated statically for demo -->
+                            <tr>
+                                <td style="font-family: 'Courier New'; font-weight: bold; color: #3b82f6;">#RT-8821</td>
+                                <td>16 Jul 2026, 08:30</td>
+                                <td>SPPG HULLER MAMA</td>
+                                <td style="font-weight: 700; color: #1e293b;">SMA 1 Guntal</td>
+                                <td>350</td>
+                                <td><div style="display:flex;align-items:center;gap:8px;"><img src="https://ui-avatars.com/api/?name=Budi+Santoso&background=e2e8f0" style="width:24px;border-radius:50%;"> Budi Santoso</div></td>
+                                <td><span class="badge badge-green">Tepat Waktu</span></td>
+                            </tr>
+                            <tr>
+                                <td style="font-family: 'Courier New'; font-weight: bold; color: #3b82f6;">#RT-8822</td>
+                                <td>16 Jul 2026, 09:15</td>
+                                <td>SPPG HULLER MAMA</td>
+                                <td style="font-weight: 700; color: #1e293b;">SMP 2 Guntal</td>
+                                <td>250</td>
+                                <td><div style="display:flex;align-items:center;gap:8px;"><img src="https://ui-avatars.com/api/?name=Joko&background=e2e8f0" style="width:24px;border-radius:50%;"> Joko</div></td>
+                                <td><span class="badge badge-green">Tepat Waktu</span></td>
+                            </tr>
+                            <tr>
+                                <td style="font-family: 'Courier New'; font-weight: bold; color: #3b82f6;">#RT-8805</td>
+                                <td>15 Jul 2026, 09:40</td>
+                                <td>YAYASAN MITRA NUSA</td>
+                                <td style="font-weight: 700; color: #1e293b;">SD 04 Kubung</td>
+                                <td>400</td>
+                                <td><div style="display:flex;align-items:center;gap:8px;"><img src="https://ui-avatars.com/api/?name=Teteen&background=e2e8f0" style="width:24px;border-radius:50%;"> Teteen</div></td>
+                                <td><span class="badge badge-yellow">Terlambat (12m)</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SCREEN: SEKOLAH -->
+            <div id="screen-sekolah" class="screen">
+                <div class="page-title">Data Sekolah Penerima MBG</div>
+                <div class="page-subtitle">Daftar lengkap 19 sekolah terdaftar di Kabupaten Solok</div>
+                
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nama Sekolah</th>
+                                <th>Kecamatan</th>
+                                <th>Koordinat Peta</th>
+                                <th>Kebutuhan Porsi</th>
+                                <th>Dapur Penyuplai</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- SPPG HULLER MAMA -->
+                            <tr>
+                                <td style="font-weight: 700; color: #1e293b;"><i class="ph-fill ph-buildings" style="color: #64748b; margin-right: 8px;"></i> SMA 1 Guntal</td>
+                                <td>Gunung Talang</td>
+                                <td style="font-family: 'Courier New'; font-size: 13px;">-0.865500, 100.648500</td>
+                                <td>350 Porsi/hari</td>
+                                <td><span class="badge badge-blue">SPPG HULLER MAMA</span></td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 700; color: #1e293b;"><i class="ph-fill ph-buildings" style="color: #64748b; margin-right: 8px;"></i> SMK Talang</td>
+                                <td>Gunung Talang</td>
+                                <td style="font-family: 'Courier New'; font-size: 13px;">-0.869000, 100.645000</td>
+                                <td>300 Porsi/hari</td>
+                                <td><span class="badge badge-blue">SPPG HULLER MAMA</span></td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 700; color: #1e293b;"><i class="ph-fill ph-buildings" style="color: #64748b; margin-right: 8px;"></i> SMP 2 Guntal</td>
+                                <td>Gunung Talang</td>
+                                <td style="font-family: 'Courier New'; font-size: 13px;">-0.864000, 100.650000</td>
+                                <td>250 Porsi/hari</td>
+                                <td><span class="badge badge-blue">SPPG HULLER MAMA</span></td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 700; color: #1e293b;"><i class="ph-fill ph-buildings" style="color: #64748b; margin-right: 8px;"></i> SD 08 Talang</td>
+                                <td>Gunung Talang</td>
+                                <td style="font-family: 'Courier New'; font-size: 13px;">-0.863000, 100.646000</td>
+                                <td>120 Porsi/hari</td>
+                                <td><span class="badge badge-blue">SPPG HULLER MAMA</span></td>
+                            </tr>
+                            <!-- YAYASAN MITRA NUSA -->
+                            <tr>
+                                <td style="font-weight: 700; color: #1e293b;"><i class="ph-fill ph-buildings" style="color: #64748b; margin-right: 8px;"></i> SD 04 Kubung</td>
+                                <td>Kubung</td>
+                                <td style="font-family: 'Courier New'; font-size: 13px;">-0.877000, 100.652000</td>
+                                <td>400 Porsi/hari</td>
+                                <td><span class="badge badge-green">YAYASAN MITRA NUSA</span></td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 700; color: #1e293b;"><i class="ph-fill ph-buildings" style="color: #64748b; margin-right: 8px;"></i> SD 29</td>
+                                <td>Kubung</td>
+                                <td style="font-family: 'Courier New'; font-size: 13px;">-0.880000, 100.648000</td>
+                                <td>200 Porsi/hari</td>
+                                <td><span class="badge badge-green">YAYASAN MITRA NUSA</span></td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 700; color: #1e293b;"><i class="ph-fill ph-buildings" style="color: #64748b; margin-right: 8px;"></i> TK Almunawarah</td>
+                                <td>Kubung</td>
+                                <td style="font-family: 'Courier New'; font-size: 13px;">-0.882000, 100.655000</td>
+                                <td>80 Porsi/hari</td>
+                                <td><span class="badge badge-green">YAYASAN MITRA NUSA</span></td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 700; color: #1e293b;"><i class="ph-fill ph-buildings" style="color: #64748b; margin-right: 8px;"></i> MIN 1 Kubung</td>
+                                <td>Kubung</td>
+                                <td style="font-family: 'Courier New'; font-size: 13px;">-0.875000, 100.654000</td>
+                                <td>320 Porsi/hari</td>
+                                <td><span class="badge badge-green">YAYASAN MITRA NUSA</span></td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 700; color: #1e293b;"><i class="ph-fill ph-buildings" style="color: #64748b; margin-right: 8px;"></i> SMP 3 Kubung</td>
+                                <td>Kubung</td>
+                                <td style="font-family: 'Courier New'; font-size: 13px;">-0.878000, 100.649000</td>
+                                <td>280 Porsi/hari</td>
+                                <td><span class="badge badge-green">YAYASAN MITRA NUSA</span></td>
+                            </tr>
+                            <!-- DAPUR MAN AMAL -->
+                            <tr>
+                                <td style="font-weight: 700; color: #1e293b;"><i class="ph-fill ph-buildings" style="color: #64748b; margin-right: 8px;"></i> SD 33 Bukit Sundi</td>
+                                <td>Bukit Sundi</td>
+                                <td style="font-family: 'Courier New'; font-size: 13px;">-0.883000, 100.638000</td>
+                                <td>300 Porsi/hari</td>
+                                <td><span class="badge badge-yellow">DAPUR MAN AMAL</span></td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 700; color: #1e293b;"><i class="ph-fill ph-buildings" style="color: #64748b; margin-right: 8px;"></i> SD 21</td>
+                                <td>Bukit Sundi</td>
+                                <td style="font-family: 'Courier New'; font-size: 13px;">-0.887000, 100.635000</td>
+                                <td>280 Porsi/hari</td>
+                                <td><span class="badge badge-yellow">DAPUR MAN AMAL</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ==================== JAVASCRIPT ==================== -->
+    <script>
+        // TAB SWITCHING LOGIC
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            
+            document.getElementById('screen-' + tabId).classList.add('active');
+            if(element) element.classList.add('active');
+            
+            // Fix map rendering issue on tab switch
+            if(tabId === 'rute' && typeof mapDesktop !== 'undefined') {
+                setTimeout(() => mapDesktop.invalidateSize(), 100);
+            }
+        }
+
+        // DATA DETAIL DAPUR
+        const dapurDetailData = [
+            {
+                id: 0,
+                nama: 'SPPG HULLER MAMA',
+                alamat: 'Jl. Lintas Sumatera, Kec. Gunung Talang, Kab. Solok',
+                status: 'Aktif Memasak',
+                statusColor: '#10b981',
+                heroBg: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
+                porsiHariIni: '1.020',
+                armadaHero: '3 Unit L300 Box Tersedia',
+                progressSelesai: 780,
+                progressTarget: 1020,
+                estimasi: 'Estimasi selesai masak pukul 07.30 WIB. Armada siap loading jam 07.45 WIB.',
+                menu: [
+                    { nama: '🍚 Nasi Putih', warna: '#f0fdf4', border: '#bbf7d0', text: '#065f46' },
+                    { nama: '🥚 Telur Balado', warna: '#fef3c7', border: '#fde68a', text: '#78350f' },
+                    { nama: '🥬 Tumis Buncis', warna: '#eff6ff', border: '#bfdbfe', text: '#1e40af' },
+                    { nama: '🥛 Susu UHT 200ml', warna: '#faf5ff', border: '#e9d5ff', text: '#6b21a8' },
+                ],
+                stok: [
+                    { nama: 'Beras', icon: '🌾', jumlah: '210 kg', persen: 70, warna: '#3b82f6', ket: 'Cukup untuk 3 hari' },
+                    { nama: 'Telur Ayam', icon: '🥚', jumlah: '1.400 butir', persen: 85, warna: '#10b981', ket: 'Stok aman' },
+                    { nama: 'Kotak Makan', icon: '📦', jumlah: '2.000 pcs', persen: 60, warna: '#f59e0b', ket: 'Perlu restock besok' },
+                    { nama: 'Gas LPG', icon: '🔥', jumlah: '4 tabung', persen: 40, warna: '#ef4444', ket: '⚠️ Segera restock!' },
+                ],
+                supir: [
+                    { nama: 'Budi Santoso', plat: 'BA 1234 FY', status: 'Loading Makanan', statusColor: '#f59e0b', statusBg: '#fef3c7' },
+                    { nama: 'Joko Widodo', plat: 'BA 5678 FY', status: 'Siap Berangkat', statusColor: '#059669', statusBg: '#d1fae5' },
+                    { nama: 'Agus Riyanto', plat: 'BA 9012 FY', status: 'Sedang Jalan', statusColor: '#3b82f6', statusBg: '#eff6ff' },
+                ],
+                sekolah: [
+                    { nama: 'SMA 1 Guntal', porsi: 350, status: 'Terkirim', statusColor: '#059669', statusBg: '#d1fae5' },
+                    { nama: 'SMK Talang', porsi: 300, status: 'Terkirim', statusColor: '#059669', statusBg: '#d1fae5' },
+                    { nama: 'SMP 2 Guntal', porsi: 250, status: 'Dalam Perjalanan', statusColor: '#3b82f6', statusBg: '#eff6ff' },
+                    { nama: 'SD 08 Talang', porsi: 120, status: 'Menunggu', statusColor: '#d97706', statusBg: '#fef3c7' },
+                ]
+            },
+            {
+                id: 1,
+                nama: 'YAYASAN MITRA NUSA BERBAGI',
+                alamat: 'Kec. Kubung, Kabupaten Solok, Sumatera Barat',
+                status: 'Aktif Memasak',
+                statusColor: '#10b981',
+                heroBg: 'linear-gradient(135deg, #065f46 0%, #10b981 100%)',
+                porsiHariIni: '2.026',
+                armadaHero: '5 Unit L300 Box Tersedia',
+                progressSelesai: 1600,
+                progressTarget: 2026,
+                estimasi: 'Estimasi selesai masak pukul 07.15 WIB. Armada pertama siap berangkat jam 07.30 WIB.',
+                menu: [
+                    { nama: '🍚 Nasi Putih', warna: '#f0fdf4', border: '#bbf7d0', text: '#065f46' },
+                    { nama: '🍗 Ayam Goreng', warna: '#fef3c7', border: '#fde68a', text: '#78350f' },
+                    { nama: '🥦 Tumis Kangkung', warna: '#eff6ff', border: '#bfdbfe', text: '#1e40af' },
+                    { nama: '🍊 Buah Jeruk', warna: '#fff7ed', border: '#fed7aa', text: '#9a3412' },
+                    { nama: '🥛 Susu UHT 200ml', warna: '#faf5ff', border: '#e9d5ff', text: '#6b21a8' },
+                ],
+                stok: [
+                    { nama: 'Beras', icon: '🌾', jumlah: '450 kg', persen: 90, warna: '#10b981', ket: 'Stok aman (5 hari)' },
+                    { nama: 'Ayam Potong', icon: '🍗', jumlah: '200 kg', persen: 65, warna: '#3b82f6', ket: 'Cukup untuk 2 hari' },
+                    { nama: 'Kotak Makan', icon: '📦', jumlah: '5.000 pcs', persen: 80, warna: '#10b981', ket: 'Stok aman' },
+                    { nama: 'Gas LPG', icon: '🔥', jumlah: '8 tabung', persen: 75, warna: '#f59e0b', ket: 'Cukup untuk 3 hari' },
+                ],
+                supir: [
+                    { nama: 'Pak Yanta', plat: 'BA 2200 MN', status: 'Sedang Jalan', statusColor: '#3b82f6', statusBg: '#eff6ff' },
+                    { nama: 'Pak Febri', plat: 'BA 3311 MN', status: 'Terkirim / Kembali', statusColor: '#059669', statusBg: '#d1fae5' },
+                    { nama: 'Anton', plat: 'BA 4422 MN', status: 'Loading Makanan', statusColor: '#f59e0b', statusBg: '#fef3c7' },
+                    { nama: 'Teteen', plat: 'BA 5533 MN', status: 'Siap Berangkat', statusColor: '#059669', statusBg: '#d1fae5' },
+                    { nama: 'Julda', plat: 'BA 6644 MN', status: 'Standby', statusColor: '#64748b', statusBg: '#f1f5f9' },
+                ],
+                sekolah: [
+                    { nama: 'SD 04 Kubung', porsi: 400, status: 'Terkirim', statusColor: '#059669', statusBg: '#d1fae5' },
+                    { nama: 'SD 29', porsi: 200, status: 'Terkirim', statusColor: '#059669', statusBg: '#d1fae5' },
+                    { nama: 'TK Almunawarah', porsi: 80, status: 'Dalam Perjalanan', statusColor: '#3b82f6', statusBg: '#eff6ff' },
+                    { nama: 'MIN 1 Kubung', porsi: 320, status: 'Menunggu', statusColor: '#d97706', statusBg: '#fef3c7' },
+                    { nama: 'SMP 3 Kubung', porsi: 280, status: 'Menunggu', statusColor: '#d97706', statusBg: '#fef3c7' },
+                ]
+            },
+            {
+                id: 2,
+                nama: 'DAPUR MAN AMAL',
+                alamat: 'Kec. Bukit Sundi, Kabupaten Solok, Sumatera Barat',
+                status: 'Pemeliharaan',
+                statusColor: '#d97706',
+                heroBg: 'linear-gradient(135deg, #78350f 0%, #f59e0b 100%)',
+                porsiHariIni: '0',
+                armadaHero: '2 Unit L300 Box (Standby)',
+                progressSelesai: 0,
+                progressTarget: 2026,
+                estimasi: '⚠️ Dapur sedang dalam pemeliharaan rutin. Pengiriman akan dilanjutkan besok.',
+                menu: [
+                    { nama: '📦 Paket Darurat Aktif', warna: '#fef3c7', border: '#fde68a', text: '#78350f' },
+                ],
+                stok: [
+                    { nama: 'Beras', icon: '🌾', jumlah: '80 kg', persen: 20, warna: '#ef4444', ket: '⚠️ Kritis! Segera restock' },
+                    { nama: 'Kotak Makan', icon: '📦', jumlah: '500 pcs', persen: 15, warna: '#ef4444', ket: '⚠️ Hampir habis' },
+                    { nama: 'Gas LPG', icon: '🔥', jumlah: '1 tabung', persen: 10, warna: '#ef4444', ket: '⚠️ Darurat! Restock segera' },
+                ],
+                supir: [
+                    { nama: 'Pak Firman', plat: 'BA 7700 AM', status: 'Standby', statusColor: '#64748b', statusBg: '#f1f5f9' },
+                    { nama: 'Pak Sam', plat: 'BA 8811 AM', status: 'Standby', statusColor: '#64748b', statusBg: '#f1f5f9' },
+                    { nama: 'Pak Beni', plat: 'BA 9922 AM', status: 'Standby', statusColor: '#64748b', statusBg: '#f1f5f9' },
+                ],
+                sekolah: [
+                    { nama: 'SD 33 Bukit Sundi', porsi: 300, status: 'Tertunda', statusColor: '#dc2626', statusBg: '#fee2e2' },
+                    { nama: 'SD 21', porsi: 280, status: 'Tertunda', statusColor: '#dc2626', statusBg: '#fee2e2' },
+                ]
+            }
+        ];
+
+        // FUNGSI BUKA HALAMAN DETAIL DAPUR
+        function openDapurDetail(id) {
+            const d = dapurDetailData[id];
+            
+            // Update hero
+            document.getElementById('detail-hero').style.background = d.heroBg;
+            document.getElementById('detail-nama').innerText = d.nama;
+            document.getElementById('detail-nama-singkat').innerText = d.nama;
+            document.getElementById('detail-alamat').innerHTML = `<i class="ph ph-map-pin"></i> ${d.alamat}`;
+            document.getElementById('detail-porsi-hari-ini').innerText = d.porsiHariIni;
+            document.getElementById('detail-armada-hero').innerText = `🚚 ${d.armadaHero}`;
+            document.getElementById('detail-status-badge').innerText = d.status;
+            document.getElementById('detail-status-badge').style.background = d.statusColor + '33';
+            document.getElementById('detail-status-badge').style.color = d.statusColor;
+
+            // Progress bar
+            const persen = Math.round((d.progressSelesai / d.progressTarget) * 100);
+            document.getElementById('detail-persen').innerText = `${persen}%`;
+            document.getElementById('detail-progress-text').innerText = `${d.progressSelesai.toLocaleString()} / ${d.progressTarget.toLocaleString()} Porsi`;
+            document.getElementById('detail-estimasi').innerText = d.estimasi;
+            setTimeout(() => {
+                document.getElementById('detail-progress-bar').style.width = persen + '%';
+            }, 100);
+
+            // Menu
+            document.getElementById('detail-menu').innerHTML = d.menu.map(m =>
+                `<span style="padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; background: ${m.warna}; border: 1px solid ${m.border}; color: ${m.text};">${m.nama}</span>`
+            ).join('');
+
+            // Stok
+            document.getElementById('detail-stok').innerHTML = d.stok.map(s => `
+                <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 6px;">
+                        <span>${s.icon} ${s.nama}</span>
+                        <span>${s.jumlah}</span>
+                    </div>
+                    <div style="height: 8px; background: #f1f5f9; border-radius: 10px; overflow: hidden; margin-bottom: 4px;">
+                        <div style="width: ${s.persen}%; height: 100%; background: ${s.warna}; border-radius: 10px;"></div>
+                    </div>
+                    <div style="font-size: 11px; color: ${s.persen < 25 ? '#dc2626' : '#64748b'}; font-weight: 600;">${s.ket}</div>
+                </div>
+            `).join('');
+
+            // Armada & Supir
+            const truckImg = "C:/Users/acer/.gemini/antigravity/brain/c7136878-8372-4400-a9b0-74170792545c/armada_l300_box_1784166954588.jpg";
+            document.getElementById('detail-armada').innerHTML = d.supir.map(s => `
+                <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #f8fafc; border-radius: 12px; border: 1px solid var(--border);">
+                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(s.nama)}&background=e0e7ff&color=1e3a8a" style="width: 40px; height: 40px; border-radius: 10px; flex-shrink:0;">
+                    <div style="flex: 1;">
+                        <div style="font-size: 14px; font-weight: 800; color: #1e293b;">${s.nama}</div>
+                        <div style="font-size: 12px; color: #64748b; font-weight: 600;">🚚 ${s.plat}</div>
+                    </div>
+                    <img src="${truckImg}" style="width: 80px; height: 48px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; flex-shrink:0;" title="${s.plat}">
+                    <span style="padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; background: ${s.statusBg}; color: ${s.statusColor}; flex-shrink:0;">${s.status}</span>
+                </div>
+            `).join('');
+
+            // Sekolah tanggungan
+            document.getElementById('detail-sekolah').innerHTML = d.sekolah.map(s => `
+                <tr>
+                    <td style="padding: 10px 4px; font-weight: 700; color: #1e293b;">${s.nama}</td>
+                    <td style="padding: 10px 4px; text-align: center; color: #64748b;">${s.porsi} porsi</td>
+                    <td style="padding: 10px 4px; text-align: center;">
+                        <span style="padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; background: ${s.statusBg}; color: ${s.statusColor};">${s.status}</span>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Pindah ke screen detail
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            document.getElementById('screen-detail-dapur').classList.add('active');
+        }
+
+        // TOAST NOTIFICATION
+        function showToast(msg, color = '#10b981') {
+            const existing = document.getElementById('global-toast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.id = 'global-toast';
+            toast.style.cssText = `position:fixed; top:24px; right:24px; background:${color}; color:#fff; padding:16px 22px; border-radius:14px; font-family:'Outfit'; font-size:14px; font-weight:700; box-shadow:0 10px 30px rgba(0,0,0,0.2); z-index:99999; display:flex; align-items:center; gap:10px; animation:slideInRight 0.4s cubic-bezier(0.175,0.885,0.32,1.275) both;`;
+            toast.innerHTML = `<span>${msg}</span>`;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.4s';
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        // MODAL PROFIL
+        function showProfileModal() {
+            document.getElementById('modal-profil').style.display = 'flex';
+        }
+
+        // Close modal on backdrop click
+        document.getElementById('modal-profil').addEventListener('click', function(e) {
+            if (e.target === this) this.style.display = 'none';
+        });
+
+        // INITIALIZE CHART.JS (ANALITIK)
+        window.addEventListener('load', () => {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            let gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(59,130,246, 0.4)');
+            gradient.addColorStop(1, 'rgba(59,130,246, 0.0)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
+                    datasets: [
+                        {
+                            label: 'Sukses Tepat Waktu',
+                            data: [35, 42, 45, 80, 130, 105, 145],
+                            borderColor: '#3b82f6',
+                            backgroundColor: gradient,
+                            borderWidth: 4,
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#fff',
+                            pointBorderColor: '#3b82f6',
+                            pointBorderWidth: 2,
+                            pointHoverRadius: 8
+                        },
+                        {
+                            label: 'Terlambat/Gagal',
+                            data: [8, 5, 7, 3, 10, 5, 4],
+                            borderColor: '#ef4444',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            borderDash: [5, 5],
+                            fill: false,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { position: 'top', align: 'end', labels: { usePointStyle: true, boxWidth: 8, font: {family: 'Outfit', weight: 600} } },
+                        tooltip: { backgroundColor: 'rgba(15,23,42,0.9)', titleFont: {family: 'Outfit', size: 13}, bodyFont: {family: 'Outfit', size: 13}, padding: 12, cornerRadius: 8 } 
+                    },
+                    scales: {
+                        y: { display: true, border: {display: false}, grid: { color: '#f1f5f9' }, ticks: { font: {family: 'Outfit'} } },
+                        x: { grid: { display: false }, ticks: { color: '#64748b', font: {family: 'Outfit', weight: 600} } }
+                    },
+                    interaction: { mode: 'index', intersect: false }
+                }
+            });
+        });
+
+        // INITIALIZE LEAFLET MAP & ROUTES (OPTIMASI RUTE)
+        let mapDesktop;
+        let desktopPolyline = null;
+        let desktopMarkers = [];
+
+        const routeData = [
+            {
+                dapurId: 0, kitchenName: "SPPG HULLER MAMA", drivers: ["Budi (L300 Box)", "Joko (L300 Box)", "Agus (Pickup)"],
+                points: [
+                    {lat: -0.867226, lng: 100.647346, name: "SPPG HULLER MAMA", type: "dapur"},
+                    {lat: -0.865500, lng: 100.648500, name: "SMA 1 Guntal", type: "sekolah", porsi: 350, dist: "0.8 km"},
+                    {lat: -0.869000, lng: 100.645000, name: "SMK Talang", type: "sekolah", porsi: 300, dist: "1.2 km"},
+                    {lat: -0.864000, lng: 100.650000, name: "SMP 2 Guntal", type: "sekolah", porsi: 250, dist: "2.5 km"},
+                    {lat: -0.863000, lng: 100.646000, name: "SD 08", type: "sekolah", porsi: 120, dist: "1.1 km"}
+                ]
+            },
+            {
+                dapurId: 1, kitchenName: "YAYASAN MITRA NUSA", drivers: ["Pak Yanta", "Pak Febri", "Teteen"],
+                points: [
+                    {lat: -0.879000, lng: 100.650000, name: "YAYASAN MITRA NUSA", type: "dapur"},
+                    {lat: -0.877000, lng: 100.652000, name: "SD 04 Kubung", type: "sekolah", porsi: 400, dist: "1.0 km"},
+                    {lat: -0.880000, lng: 100.648000, name: "SD 29", type: "sekolah", porsi: 200, dist: "1.5 km"}
+                ]
+            },
+            {
+                dapurId: 2, kitchenName: "MAN AMAL", drivers: ["Pak Firman", "Pak Sam"],
+                points: [
+                    {lat: -0.885000, lng: 100.640000, name: "MAN AMAL", type: "dapur"},
+                    {lat: -0.883000, lng: 100.638000, name: "SD 33", type: "sekolah", porsi: 300, dist: "0.5 km"},
+                    {lat: -0.887000, lng: 100.635000, name: "SD 21", type: "sekolah", porsi: 280, dist: "1.2 km"}
+                ]
+            }
+        ];
+
+        window.addEventListener('load', () => {
+            mapDesktop = L.map('map-desktop', {zoomControl: true}).setView([-0.866000, 100.647000], 14);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap' }).addTo(mapDesktop);
+            changeDapurRoute();
+        });
+
+        let activePopup = null;
+        function focusMap(lat, lng, name) {
+            mapDesktop.flyTo([lat, lng], 17, {duration: 1.0});
+            if(activePopup) mapDesktop.closePopup(activePopup);
+            activePopup = L.popup({offset: [0, -10]}).setLatLng([lat, lng]).setContent(`<b style="font-family:'Outfit'; font-size:15px; color:#3b82f6;">${name}</b>`).openOn(mapDesktop);
+        }
+
+        function changeDapurRoute() {
+            const id = parseInt(document.getElementById('dapur-select').value);
+            const data = routeData[id];
+            
+            const driverSel = document.getElementById('driver-select');
+            driverSel.innerHTML = '';
+            data.drivers.forEach(d => { driverSel.innerHTML += `<option value="${d}">${d}</option>`; });
+
+            document.getElementById('rute-count').innerText = `${data.points.length - 1} Titik Sekolah`;
+
+            if(desktopPolyline) mapDesktop.removeLayer(desktopPolyline);
+            desktopMarkers.forEach(m => mapDesktop.removeLayer(m));
+            desktopMarkers = [];
+
+            const listContainer = document.getElementById('route-list');
+            listContainer.innerHTML = '';
+            
+            const latlngs = [];
+            data.points.forEach((p, index) => {
+                latlngs.push([p.lat, p.lng]);
+                const isDapur = p.type === 'dapur';
+                
+                // Card for Right Panel
+                if(isDapur) {
+                    listContainer.innerHTML += `
+                        <div class="route-item" onclick="focusMap(${p.lat}, ${p.lng}, '${p.name}')">
+                            <div class="route-icon" style="background: #d1fae5; color: #059669;"><i class="ph-fill ph-house"></i></div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 15px; font-weight: 800; color: #1e293b;">1. ${p.name}</div>
+                                <div style="font-size: 12px; color: #64748b; margin-top: 2px;">Titik Awal (Dapur Pusat)</div>
+                            </div>
+                        </div>`;
+                } else {
+                    listContainer.innerHTML += `
+                        <div class="route-item" onclick="focusMap(${p.lat}, ${p.lng}, '${p.name}')">
+                            <div class="route-icon" style="background: #e0e7ff; color: #3b82f6; font-weight: 800; font-size: 16px;">${index+1}</div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 15px; font-weight: 800; color: #1e293b;">${index + 1}. ${p.name}</div>
+                                <div style="font-size: 12px; color: #64748b; margin-top: 2px;"><i class="ph ph-arrows-left-right"></i> ${p.dist} dari titik sebelumnya</div>
+                            </div>
+                            <div class="badge badge-blue">${p.porsi} Porsi</div>
+                        </div>`;
+                }
+
+                // Marker for Leaflet
+                const color = isDapur ? '#10B981' : '#3b82f6';
+                const markerHtml = `
+                    <div style="background-color: ${color}; width: 28px; height: 28px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; color: white; font-size: 13px; font-weight: bold; font-family:'Outfit'">
+                        ${isDapur ? '<i class="ph-fill ph-house"></i>' : index}
+                    </div>`;
+                const icon = L.divIcon({ html: markerHtml, className: '', iconSize: [32, 32] });
+                const marker = L.marker([p.lat, p.lng], {icon: icon}).bindPopup(`<b style="font-family:'Outfit'; font-size:15px;">${p.name}</b><br><span style="color:#64748b">${isDapur ? 'Dapur Pusat' : 'Sekolah Tujuan'}</span>`).addTo(mapDesktop);
+                desktopMarkers.push(marker);
+            });
+
+            // Return to start
+            const p0 = data.points[0];
+            listContainer.innerHTML += `
+                <div class="route-item" style="opacity: 0.7; border-style: dashed;" onclick="focusMap(${p0.lat}, ${p0.lng}, '${p0.name}')">
+                    <div class="route-icon" style="background: #f1f5f9; color: #64748b;"><i class="ph-fill ph-flag-checkered"></i></div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 15px; font-weight: 800; color: #1e293b;">${data.points.length + 1}. ${p0.name}</div>
+                        <div style="font-size: 12px; color: #64748b; margin-top: 2px;">Kembali ke Dapur Pusat</div>
+                    </div>
+                </div>`;
+            
+            latlngs.push([p0.lat, p0.lng]);
+            desktopPolyline = L.polyline(latlngs, { color: '#3b82f6', weight: 5, opacity: 0.8, dashArray: '10, 10', lineJoin: 'round' }).addTo(mapDesktop);
+            mapDesktop.fitBounds(desktopPolyline.getBounds(), {padding: [50, 50]});
+        }
+
+        function mulaiRute() {
+            const btn = document.querySelector('.btn-primary');
+            const driverName = document.getElementById('driver-select').value;
+            const dapurSel = document.getElementById('dapur-select');
+            const dapurName = dapurSel.options[dapurSel.selectedIndex].text;
+
+            btn.innerHTML = '<i class="ph-fill ph-spinner-gap" style="animation: spin 1s linear infinite; font-size:20px; vertical-align:bottom;"></i> Memproses Penugasan...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = '<i class="ph-fill ph-check-circle" style="font-size: 20px; vertical-align: bottom;"></i> Supir Berhasil Ditugaskan!';
+                btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                btn.disabled = false;
+
+                // Toast notifikasi
+                showToast(`🚀 ${driverName} berhasil ditugaskan dari ${dapurName}!`, '#10b981');
+
+                // Nyalakan bell badge
+                const badge = document.getElementById('bell-badge');
+                if (badge) { badge.style.display = 'block'; badge.style.animation = 'pulse 1s infinite'; }
+
+                // Tambah ke Riwayat
+                const tbody = document.getElementById('table-riwayat-body');
+                const now = new Date();
+                const jam = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+                const tgl = now.getDate() + ' ' + ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'][now.getMonth()] + ' ' + now.getFullYear();
+                const idRute = '#RT-' + Math.floor(8900 + Math.random() * 99);
+                const newRow = document.createElement('tr');
+                newRow.style.animation = 'fadeIn 0.5s ease';
+                newRow.style.background = '#f0fdf4';
+                newRow.innerHTML = `
+                    <td style="font-family:'Courier New'; font-weight:bold; color:#10b981;">${idRute}</td>
+                    <td>${tgl}, ${jam}</td>
+                    <td>${dapurName}</td>
+                    <td style="font-weight:700; color:#1e293b;">— (Rute Baru)</td>
+                    <td>—</td>
+                    <td><div style="display:flex;align-items:center;gap:8px;"><img src="https://ui-avatars.com/api/?name=${encodeURIComponent(driverName)}&background=e2e8f0" style="width:24px;border-radius:50%;"> ${driverName}</div></td>
+                    <td><span class="badge" style="background:#d1fae5;color:#059669;">Sedang Jalan</span></td>
+                `;
+                tbody.insertBefore(newRow, tbody.firstChild);
+                setTimeout(() => { newRow.style.background = ''; }, 2000);
+                
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="ph-fill ph-rocket" style="font-size: 20px; vertical-align: bottom;"></i> Eksekusi & Tugaskan Supir';
+                    btn.style.background = '';
+                }, 3000);
+            }, 1500);
+        }
+    </script>
+    <style>
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes slideInRight { from { opacity:0; transform: translateX(60px); } to { opacity:1; transform: translateX(0); } }
+        @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.3); } }
+    </style>
+</body>
+</html>
+

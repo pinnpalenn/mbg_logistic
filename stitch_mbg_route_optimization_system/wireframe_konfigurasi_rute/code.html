@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Route Configuration | MBG Logistics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "primary-fixed": "#dce1ff",
+                "inverse-on-surface": "#eaf1ff",
+                "on-background": "#0b1c30",
+                "inverse-primary": "#b6c4ff",
+                "on-tertiary-container": "#ef9900",
+                "tertiary": "#3e2400",
+                "surface-bright": "#f8f9ff",
+                "on-primary": "#ffffff",
+                "surface-tint": "#4059aa",
+                "surface-container-high": "#dce9ff",
+                "secondary": "#006c49",
+                "on-surface-variant": "#444651",
+                "secondary-fixed": "#6ffbbe",
+                "on-error-container": "#93000a",
+                "tertiary-fixed": "#ffddb8",
+                "outline": "#757682",
+                "on-surface": "#0b1c30",
+                "surface-container-highest": "#d3e4fe",
+                "on-tertiary-fixed-variant": "#653e00",
+                "on-secondary-container": "#00714d",
+                "on-primary-container": "#90a8ff",
+                "error-container": "#ffdad6",
+                "surface-dim": "#cbdbf5",
+                "surface": "#f8f9ff",
+                "on-tertiary-fixed": "#2a1700",
+                "on-primary-fixed-variant": "#264191",
+                "surface-container-low": "#eff4ff",
+                "secondary-container": "#6cf8bb",
+                "background": "#f8f9ff",
+                "surface-container-lowest": "#ffffff",
+                "primary": "#00236f",
+                "on-primary-fixed": "#00164e",
+                "primary-fixed-dim": "#b6c4ff",
+                "on-secondary-fixed-variant": "#005236",
+                "on-secondary-fixed": "#002113",
+                "tertiary-container": "#5c3800",
+                "on-secondary": "#ffffff",
+                "tertiary-fixed-dim": "#ffb95f",
+                "outline-variant": "#c5c5d3",
+                "on-tertiary": "#ffffff",
+                "inverse-surface": "#213145",
+                "primary-container": "#1e3a8a",
+                "surface-variant": "#d3e4fe",
+                "surface-container": "#e5eeff",
+                "on-error": "#ffffff",
+                "secondary-fixed-dim": "#4edea3",
+                "error": "#ba1a1a"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "margin": "24px",
+                "sm": "8px",
+                "xl": "32px",
+                "gutter": "20px",
+                "unit": "4px",
+                "md": "16px",
+                "xs": "4px",
+                "lg": "24px"
+            },
+            "fontFamily": {
+                "body-md": ["Inter"],
+                "body-lg": ["Inter"],
+                "h1": ["Inter"],
+                "h3": ["Inter"],
+                "data-mono": ["Inter"],
+                "body-sm": ["Inter"],
+                "h2": ["Inter"],
+                "label-md": ["Inter"]
+            },
+            "fontSize": {
+                "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                "h1": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "h3": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                "data-mono": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                "h2": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                "label-md": ["13px", {"lineHeight": "18px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: #c5c5d3;
+            height: 4px;
+            border-radius: 2px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-top: -6px;
+            background-color: #00236f;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md selection:bg-primary-fixed">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline fixed top-0 full-width z-40 flex justify-between items-center w-full px-margin h-16">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">menu</span>
+<h1 class="text-h2 font-h2 font-bold text-primary dark:text-primary-fixed-dim">MBG Logistics</h1>
+</div>
+<div class="flex items-center gap-md">
+<div class="hidden md:flex items-center gap-lg mr-lg">
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors px-md py-sm rounded-lg" href="#">Stats</a>
+<a class="text-primary dark:text-primary-fixed-dim font-bold hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors px-md py-sm rounded-lg" href="#">Routes</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors px-md py-sm rounded-lg" href="#">Schools</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors px-md py-sm rounded-lg" href="#">Drivers</a>
+</div>
+<img alt="User Profile" class="w-10 h-10 rounded-full object-cover" data-alt="A professional headshot of a logistics manager in a bright corporate office setting. The lighting is soft and natural, emphasizing a high-trust, modern professional atmosphere. The color palette is clean with subtle blue tones and neutral whites, reflecting the reliability and precision of a public service organization." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7Ckp3rcklIfiaDkihCGUQY36wyeSwDQsSEbzZwT6h0yrl03baCvuDa2KLjnDO9MWsVf88_4H_G4WP-Sip0nngGEyUdFBE6F4aIzS6nuTbrb6REp5kObxmeaidhHooNt86iuhTCkBh6nQwhvMhagOeLyLku_yhKyxL2VLt4hVfg4UYK_TeNlLbJXdJCe8C2HbyM0RtTABzRVVwU-z6dS5U9VVEuJQ3wGZ7diYvPMVJ4zlpU6e9tU9D1LU9_zHr8HYBTLmm4JRv4Ew"/>
+</div>
+</header>
+<main class="pt-24 pb-32 px-margin max-w-7xl mx-auto">
+<!-- Dashboard Header -->
+<div class="mb-lg flex flex-col md:flex-row md:items-end justify-between gap-md">
+<div>
+<h2 class="text-h1 font-h1 text-on-surface">Route Configuration</h2>
+<p class="text-body-lg text-on-surface-variant mt-xs">Optimize delivery paths and algorithm parameters</p>
+</div>
+<div class="flex gap-sm">
+<button class="px-lg py-sm border border-primary text-primary rounded-lg font-label-md hover:bg-surface-container transition-colors">RESET DEFAULTS</button>
+<button class="px-lg py-sm bg-primary text-on-primary rounded-lg font-label-md shadow-md hover:opacity-90 transition-opacity">RUN OPTIMIZATION</button>
+</div>
+</div>
+<!-- Main Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Left Column: Algorithm Controls -->
+<div class="md:col-span-4 flex flex-col gap-gutter">
+<!-- Algorithm Selection Card -->
+<section class="bg-surface-container-lowest rounded-xl border border-outline-variant p-lg shadow-[0px_2px_4px_rgba(30,58,138,0.05)]">
+<div class="flex items-center gap-sm mb-md pb-sm border-b border-outline-variant">
+<span class="material-symbols-outlined text-primary">settings_suggest</span>
+<h3 class="text-h3 font-h3 text-on-surface">Algorithm Setup</h3>
+</div>
+<div class="space-y-lg">
+<div>
+<label class="block text-label-md text-on-surface-variant mb-xs">OPTIMIZATION STRATEGY</label>
+<div class="relative">
+<select class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-md py-sm appearance-none focus:ring-2 focus:ring-primary focus:outline-none text-body-md">
+<option>TSP (Traveling Salesperson)</option>
+<option>Dijkstra (Shortest Path)</option>
+<option>Greedy Search</option>
+<option>Hybrid Heuristic</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-2.5 pointer-events-none text-on-surface-variant">expand_more</span>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-xs">
+<label class="text-label-md text-on-surface-variant">DISTANCE WEIGHT</label>
+<span class="text-data-mono text-primary font-bold">0.65</span>
+</div>
+<input class="w-full h-1" max="1" min="0" step="0.05" type="range" value="0.65"/>
+</div>
+<div>
+<div class="flex justify-between items-center mb-xs">
+<label class="text-label-md text-on-surface-variant">TIME WINDOW PRIORITY</label>
+<span class="text-data-mono text-primary font-bold">0.80</span>
+</div>
+<input class="w-full h-1" max="1" min="0" step="0.05" type="range" value="0.80"/>
+</div>
+</div>
+</section>
+<!-- Status Insights -->
+<section class="bg-surface-container-lowest rounded-xl border border-outline-variant p-lg shadow-[0px_2px_4px_rgba(30,58,138,0.05)]">
+<div class="flex items-center gap-sm mb-md">
+<span class="material-symbols-outlined text-secondary">analytics</span>
+<h3 class="text-h3 font-h3 text-on-surface">Efficiency Target</h3>
+</div>
+<div class="grid grid-cols-2 gap-sm">
+<div class="p-sm bg-surface-container-low rounded-lg">
+<p class="text-body-sm text-on-surface-variant">Est. Fuel Save</p>
+<p class="text-h3 font-bold text-secondary">12.4%</p>
+</div>
+<div class="p-sm bg-surface-container-low rounded-lg">
+<p class="text-body-sm text-on-surface-variant">Time Buffer</p>
+<p class="text-h3 font-bold text-primary">15m</p>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Delivery Points & Map Placeholder -->
+<div class="md:col-span-8 flex flex-col gap-gutter">
+<!-- Map Placeholder -->
+<div class="w-full h-[320px] bg-surface-dim rounded-xl border border-outline-variant relative overflow-hidden flex items-center justify-center group shadow-[0px_2px_4px_rgba(30,58,138,0.05)]">
+<img alt="Route Map" class="absolute inset-0 w-full h-full object-cover opacity-40 grayscale" data-alt="A clean and modern grayscale map of a large urban area with subtle silver tones. The map is designed for a logistics dashboard, featuring minimal street detail and zero distractions, allowing for colored route markers to be easily visible. The lighting is flat and professional, conveying a technical and operational mood." data-location="Jakarta" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1AP19u82a2NcZmP9MPWVY9FRKLS8gr_C4ogjaJO88SUK97kdCU_DOoKiSz3qtfigOsLda9aniW_wkOWJ98uUXJAUFTdZsDZCp_eQs2AY4o-KqVB8UpczQoEYQ1TZJStqKfUhs2CWAcU4S56KyGpIitNAeSWifODAgYudRVRSYOlOa5DGa5FHKPq_pI6nI26KlhmP9p1P615Wo5UnJ183p-UqspRNRNcyPe9kjpkJw9yKypsMpvfFXyWQmmc3tKedcT9mHuDL3jXs"/>
+<div class="relative z-10 flex flex-col items-center">
+<span class="material-symbols-outlined text-primary text-5xl mb-sm">map</span>
+<p class="text-body-lg font-bold text-on-surface">Interactive Route Preview</p>
+<p class="text-body-sm text-on-surface-variant">Visualizing 14 active delivery points</p>
+</div>
+</div>
+<!-- Delivery Points List -->
+<section class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-[0px_2px_4px_rgba(30,58,138,0.05)] flex-grow overflow-hidden">
+<div class="px-lg py-md border-b border-outline-variant flex justify-between items-center">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-on-surface-variant">list_alt</span>
+<h3 class="text-h3 font-h3 text-on-surface">Delivery Points</h3>
+</div>
+<button class="text-primary hover:underline text-label-md">+ ADD POINT</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-surface-container text-label-md text-on-surface-variant uppercase tracking-wider">
+<th class="px-lg py-sm">Order</th>
+<th class="px-lg py-sm">Location / School</th>
+<th class="px-lg py-sm">Time Window</th>
+<th class="px-lg py-sm">Status</th>
+<th class="px-lg py-sm">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-lg py-md font-data-mono">#01</td>
+<td class="px-lg py-md">
+<p class="font-bold text-on-surface">Central Kitchen Alpha</p>
+<p class="text-body-sm text-on-surface-variant">Main Pickup Point</p>
+</td>
+<td class="px-lg py-md text-body-sm">06:00 - 06:30</td>
+<td class="px-lg py-md">
+<span class="px-2 py-1 bg-secondary-container text-on-secondary-container rounded-full text-[10px] font-bold">READY</span>
+</td>
+<td class="px-lg py-md">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary">drag_handle</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-lg py-md font-data-mono">#02</td>
+<td class="px-lg py-md">
+<p class="font-bold text-on-surface">SD Negeri 04 Petojo</p>
+<p class="text-body-sm text-on-surface-variant">120 Packages</p>
+</td>
+<td class="px-lg py-md text-body-sm">07:15 - 07:45</td>
+<td class="px-lg py-md">
+<span class="px-2 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-full text-[10px] font-bold">PENDING</span>
+</td>
+<td class="px-lg py-md">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary">drag_handle</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-lg py-md font-data-mono">#03</td>
+<td class="px-lg py-md">
+<p class="font-bold text-on-surface">SMP Harapan Bangsa</p>
+<p class="text-body-sm text-on-surface-variant">85 Packages</p>
+</td>
+<td class="px-lg py-md text-body-sm">08:00 - 08:30</td>
+<td class="px-lg py-md">
+<span class="px-2 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-full text-[10px] font-bold">PENDING</span>
+</td>
+<td class="px-lg py-md">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary">drag_handle</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-sm bg-surface dark:bg-inverse-surface border-t border-outline-variant dark:border-outline shadow-md rounded-t-xl">
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-label-md font-label-md">Stats</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-full px-4 py-1 scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined">map</span>
+<span class="text-label-md font-label-md">Routes</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim">
+<span class="material-symbols-outlined">domain</span>
+<span class="text-label-md font-label-md">Schools</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="text-label-md font-label-md">Drivers</span>
+</div>
+</nav>
+</body></html>

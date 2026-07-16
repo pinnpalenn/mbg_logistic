@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Alat Export Diagram Capstone (Bab 3)</title>
+    <!-- Library Mermaid untuk menggambar diagram -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <!-- Library HTML2Canvas untuk mengubah diagram jadi PNG -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f0f2f5; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .diagram-container { background: white; padding: 30px; margin-bottom: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
+        .diagram-title { font-size: 20px; font-weight: bold; margin-bottom: 20px; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .download-btn { margin-top: 20px; padding: 12px 24px; background-color: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: background 0.3s; }
+        .download-btn:hover { background-color: #218838; }
+        .mermaid-wrapper { display: flex; justify-content: center; padding: 20px; background: white; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Alat Generator & Export Diagram Bab 3</h1>
+        <p>1. Tunggu beberapa detik sampai semua gambar diagram muncul.<br>
+           2. Klik tombol <b>"Download PNG"</b> di bawah masing-masing diagram untuk menyimpannya.</p>
+    </div>
+
+    <!-- 1. Flowchart Sistem -->
+    <div class="diagram-container">
+        <div class="diagram-title">1. Flowchart Sistem Utama</div>
+        <div class="mermaid-wrapper" id="wrap1">
+            <div class="mermaid">
+graph TD
+    Start([Mulai]) --> Login[Admin Melakukan Login]
+    Login --> InputData[Admin Mengelola Data Sekolah & Dapur]
+    InputData --> Pengecekan{Pilih Menu Optimasi?}
+    Pengecekan -- Tidak --> InputData
+    Pengecekan -- Ya --> AmbilJarak[Sistem Mengambil Titik Koordinat]
+    AmbilJarak --> ProsesD[Proses Algoritma Dijkstra <br/> Hitung Jarak Asli Jalan Raya]
+    ProsesD --> Matriks[Membentuk Matriks Jarak]
+    Matriks --> ProsesTSP[Proses Algoritma TSP <br/> Penentuan Urutan Kunjungan]
+    ProsesTSP --> Output[Sistem Menampilkan Peta Rute & Jadwal]
+    Output --> End([Selesai])
+            </div>
+        </div>
+        <button class="download-btn" onclick="downloadDiagram('wrap1', '1_Flowchart_Sistem.png')">⬇️ Download PNG</button>
+    </div>
+
+    <!-- 2. Flowchart Dijkstra -->
+    <div class="diagram-container">
+        <div class="diagram-title">2. Flowchart Algoritma Dijkstra</div>
+        <div class="mermaid-wrapper" id="wrap2">
+            <div class="mermaid">
+graph TD
+    Start([Mulai Dijkstra]) --> Inisialisasi[Inisialisasi jarak semua node = Inf, <br/> Jarak Node Awal = 0]
+    Inisialisasi --> Queue[Masukkan semua node ke dalam antrean]
+    Queue --> CekQueue{Antrean Kosong?}
+    CekQueue -- Ya --> SelesaiD([Selesai: Jarak Terpendek Ditemukan])
+    CekQueue -- Tidak --> EkstrakMin[Ambil node U dengan jarak minimum dari antrean]
+    EkstrakMin --> IterasiTetangga[Ambil semua tetangga V dari node U]
+    IterasiTetangga --> Relax{"Jarak U + Bobot U,V < Jarak V?"}
+    Relax -- Ya --> UpdateV[Update Jarak V = Jarak U + Bobot U,V]
+    UpdateV --> IterasiTetangga
+    Relax -- Tidak --> IterasiTetangga
+    IterasiTetangga -.->|Setelah semua tetangga U dicek| CekQueue
+            </div>
+        </div>
+        <button class="download-btn" onclick="downloadDiagram('wrap2', '2_Flowchart_Dijkstra.png')">⬇️ Download PNG</button>
+    </div>
+
+    <!-- 3. Flowchart TSP -->
+    <div class="diagram-container">
+        <div class="diagram-title">3. Flowchart Algoritma TSP</div>
+        <div class="mermaid-wrapper" id="wrap3">
+            <div class="mermaid">
+graph TD
+    Start([Mulai TSP]) --> InputTSP[Input: Titik Awal, Daftar Sekolah, <br/> Matriks Jarak Hasil Dijkstra]
+    InputTSP --> Permutasi[Bangkitkan Permutasi Kemungkinan Urutan Rute]
+    Permutasi --> CekPermutasi{Semua Kombinasi Dicek?}
+    CekPermutasi -- Ya --> OutputTSP[Pilih dan Simpan Rute dengan Total Jarak Terkecil]
+    OutputTSP --> End([Selesai])
+    CekPermutasi -- Tidak --> HitungRute[Hitung Total Jarak Rute Iterasi Saat Ini]
+    HitungRute --> Bandingkan{"Total Jarak < Jarak Minimum Tersimpan?"}
+    Bandingkan -- Ya --> UpdateMin[Update Jarak Min = Total Jarak <br/> Simpan Urutan Rute Ini]
+    Bandingkan -- Tidak --> Permutasi
+    UpdateMin --> Permutasi
+            </div>
+        </div>
+        <button class="download-btn" onclick="downloadDiagram('wrap3', '3_Flowchart_TSP.png')">⬇️ Download PNG</button>
+    </div>
+
+    <!-- 4. Use Case -->
+    <div class="diagram-container">
+        <div class="diagram-title">4. Use Case Diagram</div>
+        <div class="mermaid-wrapper" id="wrap4">
+            <div class="mermaid">
+flowchart LR
+    A([Admin/Petugas Distribusi])
+    
+    A --> UC1((Login Sistem))
+    A --> UC2((Kelola Data Sekolah))
+    A --> UC3((Kelola Data Dapur))
+    A --> UC4((Lakukan Optimasi Rute MBG))
+    A --> UC5((Lihat Peta & Jadwal Distribusi))
+    
+    UC4 -.->|include| UC6((Proses Jarak Peta - Dijkstra))
+    UC4 -.->|include| UC7((Proses Urutan - TSP))
+            </div>
+        </div>
+        <button class="download-btn" onclick="downloadDiagram('wrap4', '4_UseCase_Diagram.png')">⬇️ Download PNG</button>
+    </div>
+
+    <!-- 5. Activity Diagram -->
+    <div class="diagram-container">
+        <div class="diagram-title">5. Activity Diagram</div>
+        <div class="mermaid-wrapper" id="wrap5">
+            <div class="mermaid">
+stateDiagram-v2
+    state Admin {
+        [*] --> PilihMenuOptimasi
+        PilihMenuOptimasi --> PilihTitikTujuan : Pilih Dapur & Sekolah
+        PilihTitikTujuan --> KlikHitungRute
+        KlikHitungRute --> MenungguHasil
+        MenungguHasil --> MelihatPetaRute
+        MelihatPetaRute --> [*]
+    }
+    
+    state Sistem {
+        KlikHitungRute --> TarikDataKoordinat : Validasi
+        TarikDataKoordinat --> EksekusiDijkstra : Tarik Peta Jalan
+        EksekusiDijkstra --> EksekusiTSP : Matriks Jarak
+        EksekusiTSP --> RenderHasilPeta
+        RenderHasilPeta --> MelihatPetaRute : Tampilkan ke UI
+    }
+            </div>
+        </div>
+        <button class="download-btn" onclick="downloadDiagram('wrap5', '5_Activity_Diagram.png')">⬇️ Download PNG</button>
+    </div>
+
+    <!-- 6. Sequence Diagram -->
+    <div class="diagram-container">
+        <div class="diagram-title">6. Sequence Diagram</div>
+        <div class="mermaid-wrapper" id="wrap6">
+            <div class="mermaid">
+sequenceDiagram
+    actor Admin
+    participant UI as Antarmuka (Web)
+    participant API as Backend (Sistem)
+    participant DB as Database (MySQL)
+    
+    Admin->>UI: Memilih sekolah tujuan & Klik "Proses Rute"
+    UI->>API: Request Data (HTTP POST) /api/optimasi
+    API->>DB: Query SELECT koordinat dapur & sekolah
+    DB-->>API: Return Array Data (Lat, Lng)
+    Note over API: 1. Algoritma Dijkstra (Hitung Jarak Nyata)
+    Note over API: 2. Algoritma TSP (Hitung Permutasi Urutan)
+    API-->>UI: Response JSON (Detail Rute Optimal, GeoJSON Jalan)
+    UI-->>Admin: Menampilkan Peta Interaktif & Tabel Rute
+            </div>
+        </div>
+        <button class="download-btn" onclick="downloadDiagram('wrap6', '6_Sequence_Diagram.png')">⬇️ Download PNG</button>
+    </div>
+
+    <!-- 7. Class Diagram -->
+    <div class="diagram-container">
+        <div class="diagram-title">7. Class Diagram</div>
+        <div class="mermaid-wrapper" id="wrap7">
+            <div class="mermaid">
+classDiagram
+    class Dapur {
+        +int id_dapur
+        +string nama_dapur
+        +float latitude
+        +float longitude
+        +tambahDapur()
+        +editDapur()
+    }
+    
+    class Sekolah {
+        +int id_sekolah
+        +string nama_sekolah
+        +float latitude
+        +float longitude
+        +int porsi_mbg_dibutuhkan
+        +tambahSekolah()
+        +editSekolah()
+    }
+    
+    class RuteOptimasi {
+        +int id_rute
+        +date tanggal_eksekusi
+        +float total_jarak_km
+        +string geojson_jalur
+        +hitungDijkstra()
+        +hitungTSP()
+    }
+    
+    class AdminPengguna {
+        +int id_admin
+        +string username
+        +string password
+        +login()
+        +logout()
+    }
+    
+    AdminPengguna "1" -- "*" RuteOptimasi : Memproses
+    RuteOptimasi "*" -- "1" Dapur : Titik Keberangkatan
+    RuteOptimasi "*" -- "*" Sekolah : Daftar Kunjungan
+            </div>
+        </div>
+        <button class="download-btn" onclick="downloadDiagram('wrap7', '7_Class_Diagram.png')">⬇️ Download PNG</button>
+    </div>
+
+    <!-- 8. ERD -->
+    <div class="diagram-container">
+        <div class="diagram-title">8. Entity Relationship Diagram (ERD)</div>
+        <div class="mermaid-wrapper" id="wrap8">
+            <div class="mermaid">
+erDiagram
+    DAPUR {
+        int id_dapur PK
+        varchar nama_dapur
+        decimal latitude
+        decimal longitude
+    }
+    SEKOLAH {
+        int id_sekolah PK
+        varchar nama_sekolah
+        decimal latitude
+        decimal longitude
+        int porsi_mbg
+    }
+    RUTE {
+        int id_rute PK
+        int id_dapur FK
+        date tanggal_distribusi
+        decimal jarak_total_km
+        text detail_urutan
+    }
+    ADMIN {
+        int id_admin PK
+        varchar nama_lengkap
+        varchar username
+        varchar password
+    }
+    
+    DAPUR ||--o{ RUTE : "menjadi pangkal dari"
+    RUTE }o--|{ SEKOLAH : "mencakup kunjungan ke"
+            </div>
+        </div>
+        <button class="download-btn" onclick="downloadDiagram('wrap8', '8_ERD.png')">⬇️ Download PNG</button>
+    </div>
+
+    <script>
+        // Inisialisasi diagram
+        mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+
+        // Fungsi download
+        function downloadDiagram(elementId, filename) {
+            const element = document.getElementById(elementId);
+            const btn = element.nextElementSibling;
+            
+            // Ubah teks tombol sementara
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "⏳ Sedang memproses...";
+            btn.disabled = true;
+
+            // html2canvas render
+            html2canvas(element, { 
+                backgroundColor: "#ffffff", 
+                scale: 2 // Resolusi tinggi (Retina) agar pecah saat di-zoom di presentasi
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                // Kembalikan tombol
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }).catch(err => {
+                alert("Gagal men-download gambar: " + err);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>

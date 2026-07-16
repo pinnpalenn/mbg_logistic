@@ -1,0 +1,1904 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Rute MBG Logistics</title>
+    <!-- Modern Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons (Phosphor Icons - highly premium) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: #F8FAFC;
+            --surface: #ffffff;
+            --surface-hover: #f1f5f9;
+            --border: #e2e8f0;
+            --primary: #4F46E5;
+            --primary-glow: rgba(79, 70, 229, 0.5);
+            --secondary: #10B981;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        body { 
+            margin: 0; padding: 0; 
+            background: linear-gradient(135deg, #10b981 0%, #0ea5e9 50%, #6366f1 100%);
+            font-family: 'Outfit', sans-serif; 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; 
+            color: var(--text-main);
+        }
+        
+        .phone-frame { 
+            width: 390px; height: 844px; 
+            background: var(--bg-color); 
+            border-radius: 45px; 
+            box-shadow: 0 30px 60px rgba(0,0,0,0.2), 0 0 0 12px #fff, 0 0 0 14px #e2e8f0; 
+            overflow: hidden; 
+            position: relative; 
+            display: flex; flex-direction: column; 
+        }
+        
+        .notch {
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 120px; height: 30px;
+            background: #1c1c1c;
+            border-bottom-left-radius: 18px;
+            border-bottom-right-radius: 18px;
+            z-index: 1000;
+        }
+
+        .header { 
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 50px 20px 20px 20px; 
+            text-align: center; 
+            z-index: 10;
+            border-bottom: 1px solid var(--border);
+            position: absolute;
+            top: 0; width: 100%; box-sizing: border-box;
+        }
+        
+        .header h1 { 
+            margin: 0; font-size: 20px; font-weight: 700; 
+            background: linear-gradient(to right, #1e3a8a, #4F46E5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+        }
+        
+        .screen { 
+            display: none; 
+            flex-direction: column; 
+            height: 100%; width: 100%; 
+            position: absolute; 
+            top: 0; bottom: 85px; 
+            background: transparent; 
+            padding-top: 90px;
+            box-sizing: border-box;
+        }
+        .screen.active { display: flex; animation: fadeSlideIn 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+        
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* SPLASH SCREEN */
+        #screen-splash {
+            background: linear-gradient(160deg, #0f172a 0%, #1e3a8a 60%, #1d4ed8 100%);
+            justify-content: center;
+            align-items: center;
+            padding-top: 0;
+            bottom: 0;
+        }
+        .splash-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.08);
+            animation: ringPulse 3s ease-in-out infinite;
+        }
+        @keyframes ringPulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+        @keyframes splashFadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; pointer-events: none; }
+        }
+        @keyframes logoPopIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes progressAnim {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+
+        /* MAP STYLES */
+        .map-container { 
+            height: 45%; width: 100%; 
+            position: absolute; top: 0; left: 0; 
+            z-index: 1; 
+            border-bottom: 1px solid var(--border);
+        }
+        
+        /* BOTTOM SHEET */
+        .list-container { 
+            position: absolute;
+            bottom: 0; left: 0; width: 100%;
+            height: 55%; 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            overflow-y: auto; 
+            padding: 24px 20px 100px 20px; 
+            box-sizing: border-box;
+            z-index: 2;
+        }
+        
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        
+        /* DASHBOARD GRID */
+        .stat-grid { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 16px; 
+            padding: 20px; padding-bottom: 100px; overflow-y:auto;
+        }
+        .stat-card { 
+            background: var(--surface); 
+            border: 1px solid var(--border);
+            padding: 20px; border-radius: 20px; 
+            text-align: left; 
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            background: var(--surface-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .stat-icon-wrap {
+            width: 40px; height: 40px; border-radius: 12px;
+            display: flex; justify-content: center; align-items: center;
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+        .stat-value { font-size: 28px; font-weight: 700; color: var(--text-main); margin: 0 0 4px 0; }
+        .stat-label { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+        
+        /* CHART CARD */
+        .chart-card {
+            grid-column: span 2;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px;
+        }
+
+        .list-header { 
+            font-size: 12px; font-weight: 700; color: var(--text-muted); 
+            margin-bottom: 16px; 
+            display: flex; justify-content: space-between; 
+            text-transform: uppercase; letter-spacing: 1.5px;
+        }
+        
+        /* LIST CARDS */
+        .card { 
+            background: var(--surface); 
+            padding: 16px; border-radius: 16px; 
+            margin-bottom: 12px; 
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary); 
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .card:active, .card:hover {
+            transform: scale(0.98);
+            background: var(--surface-hover);
+            border-color: rgba(255,255,255,0.2);
+        }
+        .card.kitchen { border-left-color: var(--secondary); background: rgba(16, 185, 129, 0.05); }
+        
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .card-title { font-weight: 600; font-size: 16px; color: var(--text-main); }
+        
+        .badge { 
+            background: #f1f5f9; color: var(--text-main); 
+            padding: 4px 10px; border-radius: 20px; 
+            font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
+        }
+        .card.kitchen .badge { background: #d1fae5; color: #059669; }
+        
+        .card-subtitle { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 6px;}
+        .card-subtitle i { font-size: 16px; }
+        
+        /* BOTTOM NAVIGATION */
+        .bottom-nav { 
+            position: absolute; bottom: 0; width: 100%; height: 85px; 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border); 
+            display: flex; justify-content: space-around; align-items: center; 
+            padding-bottom: 20px; z-index: 100; box-sizing: border-box;
+        }
+        .nav-item { 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: var(--text-muted); font-size: 11px; font-weight: 600; cursor: pointer; 
+            transition: all 0.3s;
+            padding: 8px 12px; margin-top: 8px; border-radius: 20px;
+        }
+        .nav-item.active { 
+            color: #064E3B; 
+            background: #6EE7B7; 
+        }
+        .nav-icon { font-size: 24px; margin-bottom: 4px; transition: transform 0.3s;}
+        .nav-item.active .nav-icon { transform: translateY(-2px) scale(1.05); color: #064E3B; }
+
+        /* LEAFLET OVERRIDES FOR DARK MODE */
+        .leaflet-popup-content-wrapper { background: #ffffff; color: #1e293b; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .leaflet-popup-tip { background: #ffffff; border: 1px solid var(--border); }
+        .leaflet-container { background: #f1f5f9; }
+        
+        /* User Profile in Header */
+        .header-profile { position: absolute; right: 20px; top: 45px; width: 32px; height: 32px; border-radius: 50%; background: var(--surface); display: flex; justify-content: center; align-items: center; border: 1px solid var(--border); }
+    </style>
+</head>
+<body>
+
+<div class="phone-frame">
+    <div class="notch"></div>
+
+    <!-- SPLASH SCREEN -->
+    <div id="screen-splash" class="screen active" style="position:absolute; inset:0; z-index:9998;">
+        <!-- Decorative rings -->
+        <div class="splash-ring" style="width:500px;height:500px;top:50%;left:50%;transform:translate(-50%,-50%); animation-delay:0s;"></div>
+        <div class="splash-ring" style="width:380px;height:380px;top:50%;left:50%;transform:translate(-50%,-50%); animation-delay:0.5s;"></div>
+        <div class="splash-ring" style="width:260px;height:260px;top:50%;left:50%;transform:translate(-50%,-50%); animation-delay:1s;"></div>
+
+        <div style="position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:0;">
+            <!-- Logo -->
+            <div style="width:96px;height:96px;background:rgba(255,255,255,0.12);border:2px solid rgba(255,255,255,0.2);border-radius:28px;display:flex;justify-content:center;align-items:center;margin-bottom:28px;animation:logoPopIn 0.8s cubic-bezier(0.175,0.885,0.32,1.275) 0.3s both;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                <i class="ph-fill ph-truck" style="font-size:52px;color:#fff;"></i>
+            </div>
+            <div style="font-size:30px;font-weight:800;color:#fff;letter-spacing:-0.5px;animation:logoPopIn 0.8s ease 0.5s both;">Logistik MBG</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-top:8px;margin-bottom:48px;animation:logoPopIn 0.8s ease 0.6s both;">Sistem Distribusi Makanan Bergizi</div>
+
+            <!-- Loading bar -->
+            <div style="width:160px;height:3px;background:rgba(255,255,255,0.15);border-radius:4px;overflow:hidden;">
+                <div style="height:100%;background:linear-gradient(to right,#60a5fa,#a78bfa);border-radius:4px;animation:progressAnim 2.2s ease forwards;"></div>
+            </div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:12px;letter-spacing:1px;">MEMUAT DATA...</div>
+        </div>
+    </div>
+
+    <!-- 0. SCREEN LOGIN -->
+    <div id="screen-login" class="screen" style="background-color: #F8FAFC; justify-content: center; align-items: center; padding: 20px;">
+        <div style="width: 100%; text-align: center; margin-bottom: 40px;">
+            <div style="width: 80px; height: 80px; background: #1e3a8a; border-radius: 20px; display: flex; justify-content: center; align-items: center; margin: 0 auto 24px auto; box-shadow: 0 10px 25px rgba(30,58,138,0.2);">
+                <i class="ph-fill ph-truck" style="font-size: 40px; color: #fff;"></i>
+            </div>
+            <h2 style="margin: 0 0 8px 0; color: #1e3a8a; font-size: 28px; font-weight: 800;">Logistik MBG</h2>
+            <p style="margin: 0; color: #64748b; font-size: 14px;">Masuk ke portal administrator</p>
+        </div>
+        
+        <div style="width: 100%; max-width: 300px;">
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">Alamat Email</label>
+                <div style="display: flex; align-items: center; background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px 16px;">
+                    <i class="ph ph-envelope-simple" style="color: #94a3b8; font-size: 18px; margin-right: 12px;"></i>
+                    <input type="email" placeholder="admin@mbg.id" value="admin@mbg.id" style="border: none; outline: none; width: 100%; font-family: 'Outfit'; font-size: 14px; color: #1e293b; background: transparent;">
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+                <label style="display: block; font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">Kata Sandi</label>
+                <div style="display: flex; align-items: center; background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px 16px;">
+                    <i class="ph ph-lock-key" style="color: #94a3b8; font-size: 18px; margin-right: 12px;"></i>
+                    <input type="password" placeholder="••••••••" value="password123" style="border: none; outline: none; width: 100%; font-family: 'Outfit'; font-size: 14px; color: #1e293b; background: transparent;">
+                </div>
+            </div>
+            
+            <button onclick="doLogin()" style="width: 100%; padding: 16px; border-radius: 12px; border: none; background: #0284c7; color: #fff; font-size: 16px; font-weight: 700; font-family: 'Outfit'; cursor: pointer; box-shadow: 0 10px 25px rgba(2,132,199,0.3); display: flex; justify-content: center; align-items: center; gap: 8px;">
+                Masuk Sistem <i class="ph ph-arrow-right" style="font-size: 18px;"></i>
+            </button>
+
+            <div style="text-align: center; margin-top: 24px;">
+                <span style="color: #64748b; font-size: 13px;">Belum punya akun? </span>
+                <span onclick="showRegister()" style="color: #0284c7; font-size: 13px; font-weight: 700; cursor: pointer;">Daftar Sekarang</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 0.1 SCREEN REGISTER -->
+    <div id="screen-register" class="screen" style="background-color: #F8FAFC; justify-content: center; align-items: center; padding: 20px;">
+        <div style="width: 100%; text-align: center; margin-bottom: 30px;">
+            <div style="width: 60px; height: 60px; background: #0284c7; border-radius: 16px; display: flex; justify-content: center; align-items: center; margin: 0 auto 16px auto; box-shadow: 0 10px 25px rgba(2,132,199,0.2);">
+                <i class="ph-fill ph-user-plus" style="font-size: 32px; color: #fff;"></i>
+            </div>
+            <h2 style="margin: 0 0 8px 0; color: #0F172A; font-size: 24px; font-weight: 800;">Buat Akun Baru</h2>
+            <p style="margin: 0; color: #64748b; font-size: 13px;">Daftar sebagai administrator logistik</p>
+        </div>
+        
+        <div style="width: 100%; max-width: 300px;">
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">Nama Lengkap</label>
+                <div style="display: flex; align-items: center; background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px 16px;">
+                    <i class="ph ph-user" style="color: #94a3b8; font-size: 18px; margin-right: 12px;"></i>
+                    <input type="text" placeholder="John Doe" style="border: none; outline: none; width: 100%; font-family: 'Outfit'; font-size: 14px; color: #1e293b; background: transparent;">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">Alamat Email</label>
+                <div style="display: flex; align-items: center; background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px 16px;">
+                    <i class="ph ph-envelope-simple" style="color: #94a3b8; font-size: 18px; margin-right: 12px;"></i>
+                    <input type="email" placeholder="admin@mbg.id" style="border: none; outline: none; width: 100%; font-family: 'Outfit'; font-size: 14px; color: #1e293b; background: transparent;">
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+                <label style="display: block; font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">Kata Sandi</label>
+                <div style="display: flex; align-items: center; background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px 16px;">
+                    <i class="ph ph-lock-key" style="color: #94a3b8; font-size: 18px; margin-right: 12px;"></i>
+                    <input type="password" placeholder="••••••••" style="border: none; outline: none; width: 100%; font-family: 'Outfit'; font-size: 14px; color: #1e293b; background: transparent;">
+                </div>
+            </div>
+            
+            <button onclick="doRegister()" style="width: 100%; padding: 16px; border-radius: 12px; border: none; background: #0284c7; color: #fff; font-size: 16px; font-weight: 700; font-family: 'Outfit'; cursor: pointer; box-shadow: 0 10px 25px rgba(2,132,199,0.3); display: flex; justify-content: center; align-items: center; gap: 8px;">
+                Daftar & Masuk <i class="ph ph-check-circle" style="font-size: 18px;"></i>
+            </button>
+
+            <div style="text-align: center; margin-top: 24px;">
+                <span style="color: #64748b; font-size: 13px;">Sudah punya akun? </span>
+                <span onclick="showLogin()" style="color: #0284c7; font-size: 13px; font-weight: 700; cursor: pointer;">Masuk di sini</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. SCREEN RUTE -->
+    <div id="screen-rute" class="screen" style="padding:0;">
+        <div id="map" class="map-container"></div>
+        
+        <div class="list-container">
+            <div class="list-header" style="flex-direction: column; gap: 8px;">
+                <div style="display:flex; justify-content:space-between; width:100%;">
+                    <span>Pilih Dapur Pusat</span>
+                </div>
+                <select id="dapur-select" onchange="changeDapurRoute()" style="background:var(--surface); color:var(--text-main); border:1px solid var(--border); padding:10px 12px; border-radius:12px; font-family:'Outfit'; outline:none; font-size:14px; width:100%;">
+                    <option value="0">SPPG HULLER MAMA</option>
+                    <option value="1">YAYASAN MITRA NUSA BERBAGI</option>
+                    <option value="2">MAN AMAL</option>
+                </select>
+            </div>
+            
+            <div class="list-header" style="margin-top: 16px;">
+                <span>Assign Driver</span>
+            </div>
+            <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px; display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+                <img id="driver-avatar" src="https://ui-avatars.com/api/?name=Budi&background=3b82f6&color=fff" style="width:36px; height:36px; border-radius:50%;">
+                <div style="flex:1;">
+                    <select id="driver-select" style="background:transparent; color:var(--text-main); border:none; padding:0; font-family:'Outfit'; font-size:14px; font-weight:600; outline:none; width:100%; cursor:pointer;" onchange="updateDriverAvatar()">
+                        <!-- Options generated by JS -->
+                    </select>
+                    <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Supir Utama</div>
+                </div>
+                <div class="badge" style="background:rgba(16, 185, 129, 0.2); color:#34d399;">Assigned</div>
+            </div>
+
+            <div class="list-header" style="margin-top: 24px;">
+                <span id="rute-title">Urutan Pengiriman</span>
+                <span id="rute-count" style="color: #a5b4fc;">4 Titik</span>
+            </div>
+
+            <div id="route-list">
+                <!-- Javascript will render the route cards here -->
+            </div>
+        </div>
+    </div>
+    
+    <div class="header" id="app-header" style="display:none; justify-content:space-between; align-items:center; padding: 50px 20px 16px 20px;">
+        <i class="ph ph-list" style="font-size:24px; color:#1e3a8a; cursor:pointer;"></i>
+        <h1 id="page-title" style="flex:1; text-align:center;">Optimasi Rute</h1>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div style="position:relative; cursor:pointer;" onclick="changeTab('notifikasi', 'Notifikasi & Peringatan', null)">
+                <i class="ph ph-bell" style="font-size:24px; color:#1e3a8a;"></i>
+                <div style="position:absolute; top:0; right:2px; width:8px; height:8px; background:#ef4444; border-radius:50%; border:2px solid #fff;"></div>
+            </div>
+            <img id="header-avatar" src="https://ui-avatars.com/api/?name=Admin+MBG&background=1e3a8a&color=fff" onclick="changeTab('profil', 'Profil Saya', null)" style="width:32px;height:32px;border-radius:50%;border:2px solid #e0e7ff;cursor:pointer;" title="Profil">
+        </div>
+    </div>
+
+    <!-- MODAL KONFIRMASI LOGOUT -->
+    <div id="logout-modal" style="display:none; position:fixed; inset:0; z-index:9999; justify-content:center; align-items:flex-end; padding-bottom:0;">
+        <!-- Backdrop -->
+        <div onclick="hideLogoutModal()" style="position:absolute; inset:0; background:rgba(15,17,26,0.6); backdrop-filter:blur(4px);"></div>
+        
+        <!-- Modal Sheet -->
+        <div style="position:relative; width:100%; max-width:480px; background:#fff; border-radius:24px 24px 0 0; padding:32px 24px 40px; z-index:1; animation: slideUp 0.3s cubic-bezier(0.175,0.885,0.32,1.275) forwards;">
+            <!-- Handle Bar -->
+            <div style="width:40px; height:4px; background:#e2e8f0; border-radius:4px; margin:0 auto 24px;"></div>
+
+            <!-- Icon -->
+            <div style="width:64px; height:64px; background:#fee2e2; border-radius:20px; display:flex; justify-content:center; align-items:center; margin:0 auto 20px;">
+                <i class="ph-fill ph-sign-out" style="font-size:32px; color:#ef4444;"></i>
+            </div>
+
+            <!-- Text -->
+            <div style="text-align:center; margin-bottom:8px;">
+                <div style="font-size:22px; font-weight:800; color:#1e293b;">Keluar dari Aplikasi?</div>
+            </div>
+            <p style="text-align:center; font-size:13px; color:#64748b; line-height:1.6; margin:0 0 32px;">
+                Sesi Anda akan diakhiri dan Anda akan diarahkan kembali ke halaman Login. Pastikan semua data sudah tersimpan.
+            </p>
+
+            <!-- Buttons -->
+            <button onclick="confirmLogout()" style="width:100%; padding:16px; border-radius:14px; border:none; background:#ef4444; color:#fff; font-size:16px; font-weight:800; font-family:'Outfit'; cursor:pointer; margin-bottom:12px; box-shadow:0 8px 20px rgba(239,68,68,0.3); display:flex; justify-content:center; align-items:center; gap:8px;">
+                <i class="ph-fill ph-sign-out" style="font-size:18px;"></i> Ya, Keluar Sekarang
+            </button>
+            <button onclick="hideLogoutModal()" style="width:100%; padding:16px; border-radius:14px; border:1px solid #e2e8f0; background:#f8fafc; color:#64748b; font-size:16px; font-weight:700; font-family:'Outfit'; cursor:pointer;">
+                Batal, Tetap di Sini
+            </button>
+        </div>
+        <style>@keyframes slideUp { from { transform: translateY(100%); opacity:0; } to { transform: translateY(0); opacity:1; } }</style>
+    </div>
+
+    <div id="screen-statistik" class="screen" style="background-color: #F8FAFC; color: #1e293b;">
+        <div style="padding: 20px; padding-bottom: 120px; overflow-y: auto;">
+            
+            <h2 style="margin: 0 0 4px 0; font-size: 24px; color: #1e3a8a; font-weight: 800;">Laporan Analitik</h2>
+            <p style="margin: 0 0 16px 0; font-size: 12px; color: #64748b;">Ikhtisar efisiensi operasional dan performa pengiriman.</p>
+            
+            <div style="display: flex; gap: 8px; margin-bottom: 24px;">
+                <button style="flex: 1; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px; font-family: 'Outfit'; font-weight: 600; font-size: 12px; display: flex; justify-content: center; align-items: center; gap: 6px; cursor: pointer;"><i class="ph ph-calendar-blank"></i> Bulan Ini</button>
+                <button style="flex: 1; background: #1e3a8a; border: none; color: #fff; border-radius: 8px; padding: 8px; font-family: 'Outfit'; font-weight: 600; font-size: 12px; display: flex; justify-content: center; align-items: center; gap: 6px; cursor: pointer;"><i class="ph ph-download-simple"></i> Ekspor Data</button>
+            </div>
+
+            <!-- Card 1: Status Pengiriman -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                    <div>
+                        <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">STATUS PENGIRIMAN</div>
+                        <div style="font-size: 28px; font-weight: 800; color: #1e293b;">98.4%</div>
+                    </div>
+                    <div style="background: #d1fae5; color: #059669; font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 20px;">+2.1%</div>
+                </div>
+                <!-- Mini Bar Chart CSS -->
+                <div style="display: flex; gap: 4px; align-items: flex-end; height: 40px; margin-bottom: 8px;">
+                    <div style="flex: 1; background: #1e3a8a; height: 60%; border-radius: 2px;"></div>
+                    <div style="flex: 1; background: #1e3a8a; height: 65%; border-radius: 2px;"></div>
+                    <div style="flex: 1; background: #1e3a8a; height: 75%; border-radius: 2px;"></div>
+                    <div style="flex: 1; background: #1e3a8a; height: 70%; border-radius: 2px;"></div>
+                    <div style="flex: 1; background: #1e3a8a; height: 80%; border-radius: 2px;"></div>
+                    <div style="flex: 1; background: #1e3a8a; height: 85%; border-radius: 2px;"></div>
+                    <div style="flex: 1; background: #1e3a8a; height: 90%; border-radius: 2px;"></div>
+                    <div style="flex: 1; background: #1e3a8a; height: 85%; border-radius: 2px;"></div>
+                    <div style="flex: 1; background: #1e3a8a; height: 80%; border-radius: 2px;"></div>
+                    <div style="flex: 1; background: #1e3a8a; height: 85%; border-radius: 2px;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; font-weight: 600;">
+                    <div>10 Hari Terakhir</div>
+                    <div>Hari Ini</div>
+                </div>
+            </div>
+
+            <!-- Card 2: Penghematan BBM -->
+            <div style="background: #1e3a8a; color: #fff; padding: 20px; border-radius: 16px; margin-bottom: 16px; box-shadow: 0 10px 20px rgba(30,58,138,0.2);">
+                <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;"><i class="ph ph-gas-pump" style="font-size: 18px;"></i></div>
+                <div style="font-size: 10px; font-weight: 700; opacity: 0.8; margin-bottom: 4px; text-transform: uppercase;">PENGHEMATAN BBM</div>
+                <div style="font-size: 24px; font-weight: 800; margin-bottom: 4px;">Rp 12.4M</div>
+                <div style="font-size: 11px; opacity: 0.8; margin-bottom: 16px;">Optimasi Dijkstra+TSP</div>
+                <div style="font-size: 11px; font-weight: 700;"><i class="ph ph-trend-down"></i> Efisiensi +15%</div>
+            </div>
+
+            <!-- Card 3: Rata-Rata Waktu -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                <div style="width: 32px; height: 32px; background: #e0e7ff; color: #1e3a8a; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;"><i class="ph ph-clock" style="font-size: 18px;"></i></div>
+                <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">RATA-RATA WAKTU</div>
+                <div style="font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 4px;">42 Menit</div>
+                <div style="font-size: 11px; color: #64748b; margin-bottom: 16px;">Per rute sekolah</div>
+                <hr style="border: 0; border-top: 1px dashed #e2e8f0; margin-bottom: 12px;">
+                <div style="font-size: 11px; font-weight: 700; color: #ef4444;"><i class="ph ph-trend-down"></i> -4m dari target</div>
+            </div>
+
+            <!-- Card 4: Tren Pengiriman -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                    <div style="font-size: 15px; font-weight: 800; color: #1e293b; width: 60%;">Tren Pengiriman Sukses vs Gagal</div>
+                    <div style="display: flex; gap: 8px; font-size: 10px; font-weight: 600; color: #64748b;">
+                        <div style="display: flex; align-items: center; gap: 4px;"><div style="width: 8px; height: 8px; border-radius: 50%; background: #1e3a8a;"></div>Sukses</div>
+                        <div style="display: flex; align-items: center; gap: 4px;"><div style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444;"></div>Gagal</div>
+                    </div>
+                </div>
+                <div style="position: relative; height: 130px; width: 100%;">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Card 5: Efisiensi Rute Wilayah -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                <h3 style="margin: 0 0 16px 0; color: #1e3a8a; font-size: 15px; font-weight: 800;">Efisiensi Rute Wilayah</h3>
+                
+                <div style="margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: #1e293b; margin-bottom: 4px;"><span>Kec. Gunung Talang</span> <span style="color: #0284c7;">92%</span></div>
+                    <div style="height: 6px; background: #f1f5f9; border-radius: 4px; overflow: hidden;"><div style="width: 92%; height: 100%; background: #1e3a8a; border-radius: 4px;"></div></div>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: #1e293b; margin-bottom: 4px;"><span>Kec. Kubung</span> <span style="color: #0284c7;">89%</span></div>
+                    <div style="height: 6px; background: #f1f5f9; border-radius: 4px; overflow: hidden;"><div style="width: 89%; height: 100%; background: #1e3a8a; border-radius: 4px;"></div></div>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: #1e293b; margin-bottom: 4px;"><span>Kec. Bukit Sundi</span> <span style="color: #0284c7;">78%</span></div>
+                    <div style="height: 6px; background: #f1f5f9; border-radius: 4px; overflow: hidden;"><div style="width: 78%; height: 100%; background: #1e3a8a; border-radius: 4px;"></div></div>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: #1e293b; margin-bottom: 4px;"><span>Kec. Lembang Jaya</span> <span style="color: #0284c7;">88%</span></div>
+                    <div style="height: 6px; background: #f1f5f9; border-radius: 4px; overflow: hidden;"><div style="width: 88%; height: 100%; background: #1e3a8a; border-radius: 4px;"></div></div>
+                </div>
+
+                <div style="background: #d1fae5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 12px; font-size: 10px; color: #064e3b; line-height: 1.4; font-weight: 600;">
+                    Tip: Rute di Kec. Gunung Talang menunjukkan kepadatan jalan raya. Algoritma Dijkstra merekomendasikan jalur alternatif via Jln Lintas Sumatera.
+                </div>
+            </div>
+
+            <!-- Card 6: Data Pengiriman Terbaru -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); overflow: hidden;">
+                <div style="padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0; color: #1e3a8a; font-size: 15px; font-weight: 800;">Data Pengiriman Terbaru</h3>
+                    <div style="font-size: 11px; font-weight: 700; color: #1e3a8a; cursor: pointer;">Lihat<br>Semua</div>
+                </div>
+                
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 11px;">
+                    <tr style="background: #f8fafc; color: #64748b;">
+                        <th style="padding: 12px 16px; font-weight: 700; width: 25%;">ID RUTE</th>
+                        <th style="padding: 12px 16px; font-weight: 700; width: 35%;">SOPIR</th>
+                        <th style="padding: 12px 16px; font-weight: 700; width: 40%;">TUJUAN</th>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 12px 16px; color: #1e293b; font-weight: 600;">#RT-8821</td>
+                        <td style="padding: 12px 16px; color: #1e293b;">Pak Yanta</td>
+                        <td style="padding: 12px 16px; color: #1e293b; font-weight: 600;">SMA 1 Guntal</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 12px 16px; color: #1e293b; font-weight: 600;">#RT-8822</td>
+                        <td style="padding: 12px 16px; color: #1e293b;">Budi Santoso</td>
+                        <td style="padding: 12px 16px; color: #1e293b; font-weight: 600;">SMP 2 Guntal</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 12px 16px; color: #1e293b; font-weight: 600;">#RT-8823</td>
+                        <td style="padding: 12px 16px; color: #1e293b;">Pak Firman</td>
+                        <td style="padding: 12px 16px; color: #1e293b; font-weight: 600;">SD 08 Talang</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px 16px; color: #1e293b; font-weight: 600;">#RT-8824</td>
+                        <td style="padding: 12px 16px; color: #1e293b;">Joko</td>
+                        <td style="padding: 12px 16px; color: #1e293b; font-weight: 600;">MIN 1 Solok</td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- 3. SCREEN SEKOLAH -->
+    <div id="screen-sekolah" class="screen" style="background-color: #F8FAFC; color: #1e293b;">
+        <div style="padding: 20px; padding-bottom: 120px; overflow-y: auto;">
+            
+            <!-- Header -->
+            <h2 style="margin: 0 0 4px 0; font-size: 24px; color: #1e3a8a; font-weight: 800;">Sekolah Penerima</h2>
+            <p style="margin: 0 0 16px 0; font-size: 12px; color: #64748b;">Memantau distribusi MBG untuk 26 institusi mitra.</p>
+            
+            <!-- Search -->
+            <div style="display:flex; align-items:center; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:10px 12px; margin-bottom:12px;">
+                <i class="ph ph-magnifying-glass" style="color:#94a3b8; margin-right:8px; font-size:16px;"></i>
+                <input type="text" placeholder="Cari nama sekolah atau ID..." style="border:none; outline:none; width:100%; font-family:'Outfit'; font-size:12px;">
+            </div>
+
+            <!-- Filter Button -->
+            <button style="width:100%; padding: 10px; border-radius: 8px; border: none; background: #0b1f50; color: #fff; font-weight: 600; font-family: 'Outfit'; display: flex; justify-content: center; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 16px;">
+                <i class="ph ph-faders"></i> Filter
+            </button>
+
+            <!-- Chips -->
+            <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin-bottom:16px; scrollbar-width:none;">
+                <div style="background:#0b1f50; color:#fff; padding:6px 16px; border-radius:20px; font-size:11px; font-weight:600; white-space:nowrap;">Semua Sekolah</div>
+                <div style="background:#e0e7ff; color:#1e3a8a; padding:6px 16px; border-radius:20px; font-size:11px; font-weight:600; white-space:nowrap;">Terkirim Hari Ini (12)</div>
+                <div style="background:#e0e7ff; color:#1e3a8a; padding:6px 16px; border-radius:20px; font-size:11px; font-weight:600; white-space:nowrap;">Menunggu (14)</div>
+            </div>
+
+            <style>
+                .school-group { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; margin-bottom: 16px; overflow: hidden; }
+                .school-group summary { padding: 16px; font-weight: 700; color: #1e3a8a; cursor: pointer; display: flex; align-items: center; gap: 12px; background: #f8fafc; outline: none; border-bottom: 1px solid #e2e8f0; }
+                .school-group summary::marker { display: none; }
+                .school-group summary::-webkit-details-marker { display: none; }
+                .school-group .details-content { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+                .school-card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; }
+            </style>
+
+            <!-- DAPUR 1: SPPG HULLER MAMA -->
+            <details class="school-group" open>
+                <summary>
+                    <div style="width:32px; height:32px; border-radius:8px; background:#d1fae5; color:#059669; display:flex; justify-content:center; align-items:center;"><i class="ph-fill ph-house"></i></div>
+                    <div style="flex:1;">
+                        <div style="font-size:15px;">Dapur: SPPG HULLER MAMA</div>
+                        <div style="font-size:11px; color:#64748b; font-weight:500;">4 Sekolah (1.020 Porsi)</div>
+                    </div>
+                    <i class="ph ph-caret-down" style="color:#64748b;"></i>
+                </summary>
+                <div class="details-content">
+                    <!-- School 1 -->
+                    <div class="school-card">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                            <div style="width:36px; height:36px; background:#1e3a8a; color:#fff; border-radius:8px; display:flex; justify-content:center; align-items:center;">
+                                <i class="ph-fill ph-graduation-cap" style="font-size:20px;"></i>
+                            </div>
+                            <div style="background:#34d399; color:#fff; font-size:9px; font-weight:800; padding:4px 10px; border-radius:20px;">TERKIRIM</div>
+                        </div>
+                        <div style="font-size:15px; font-weight:800; color:#1e293b; margin-bottom:4px;">SMA 1 Guntal</div>
+                        <div style="font-size:10px; color:#64748b; display:flex; align-items:center; gap:4px; margin-bottom:4px;"><i class="ph ph-map-pin"></i> Jl. Pendidikan No. 1, Guntal</div>
+                        <div style="font-size:10px; color:#64748b; display:flex; align-items:center; gap:4px; margin-bottom:16px;"><i class="ph ph-user"></i> Bpk. Hasanuddin (Kepala Sekolah)</div>
+                        
+                        <div style="border-top: 1px solid #f1f5f9; padding-top:12px; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-size:9px; font-weight:700; color:#94a3b8; letter-spacing:0.5px;">PORSI HARIAN</div>
+                                <div style="font-size:18px; font-weight:800; color:#1e3a8a;">350</div>
+                            </div>
+                            <i class="ph ph-caret-right" style="color:#1e3a8a; font-size:16px;"></i>
+                        </div>
+                    </div>
+
+                    <!-- School 2 -->
+                    <div class="school-card">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                            <div style="width:36px; height:36px; background:#1e3a8a; color:#fff; border-radius:8px; display:flex; justify-content:center; align-items:center;">
+                                <i class="ph-fill ph-graduation-cap" style="font-size:20px;"></i>
+                            </div>
+                            <div style="background:#fee2e2; color:#ef4444; font-size:9px; font-weight:800; padding:4px 10px; border-radius:20px;">MENUNGGU</div>
+                        </div>
+                        <div style="font-size:15px; font-weight:800; color:#1e293b; margin-bottom:4px;">SMK Talang</div>
+                        <div style="font-size:10px; color:#64748b; display:flex; align-items:center; gap:4px; margin-bottom:4px;"><i class="ph ph-map-pin"></i> Kawasan Industri Talang</div>
+                        <div style="font-size:10px; color:#64748b; display:flex; align-items:center; gap:4px; margin-bottom:16px;"><i class="ph ph-user"></i> Ibu Siti Aisyah (Admin)</div>
+                        
+                        <div style="border-top: 1px solid #f1f5f9; padding-top:12px; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-size:9px; font-weight:700; color:#94a3b8; letter-spacing:0.5px;">PORSI HARIAN</div>
+                                <div style="font-size:18px; font-weight:800; color:#1e3a8a;">300</div>
+                            </div>
+                            <i class="ph ph-caret-right" style="color:#1e3a8a; font-size:16px;"></i>
+                        </div>
+                    </div>
+
+                    <!-- School 3 -->
+                    <div class="school-card">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                            <div style="width:36px; height:36px; background:#1e3a8a; color:#fff; border-radius:8px; display:flex; justify-content:center; align-items:center;">
+                                <i class="ph-fill ph-graduation-cap" style="font-size:20px;"></i>
+                            </div>
+                            <div style="background:#fee2e2; color:#ef4444; font-size:9px; font-weight:800; padding:4px 10px; border-radius:20px;">MENUNGGU</div>
+                        </div>
+                        <div style="font-size:15px; font-weight:800; color:#1e293b; margin-bottom:4px;">SMP 2 Guntal</div>
+                        <div style="font-size:10px; color:#64748b; display:flex; align-items:center; gap:4px; margin-bottom:4px;"><i class="ph ph-map-pin"></i> Jl. Pendidikan No. 2, Guntal</div>
+                        <div style="font-size:10px; color:#64748b; display:flex; align-items:center; gap:4px; margin-bottom:16px;"><i class="ph ph-user"></i> Bpk. Tono (Kepala Sekolah)</div>
+                        
+                        <div style="border-top: 1px solid #f1f5f9; padding-top:12px; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-size:9px; font-weight:700; color:#94a3b8; letter-spacing:0.5px;">PORSI HARIAN</div>
+                                <div style="font-size:18px; font-weight:800; color:#1e3a8a;">250</div>
+                            </div>
+                            <i class="ph ph-caret-right" style="color:#1e3a8a; font-size:16px;"></i>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- DAPUR 2: YAYASAN MITRA NUSA BERBAGI -->
+            <details class="school-group">
+                <summary>
+                    <div style="width:32px; height:32px; border-radius:8px; background:#e0e7ff; color:#4F46E5; display:flex; justify-content:center; align-items:center;"><i class="ph-fill ph-house"></i></div>
+                    <div style="flex:1;">
+                        <div style="font-size:15px;">Dapur: YAYASAN MITRA NUSA</div>
+                        <div style="font-size:11px; color:#64748b; font-weight:500;">9 Sekolah (1.500 Porsi)</div>
+                    </div>
+                    <i class="ph ph-caret-down" style="color:#64748b;"></i>
+                </summary>
+                <div class="details-content">
+                    <div class="school-card">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                            <div style="width:36px; height:36px; background:#1e3a8a; color:#fff; border-radius:8px; display:flex; justify-content:center; align-items:center;">
+                                <i class="ph-fill ph-graduation-cap" style="font-size:20px;"></i>
+                            </div>
+                            <div style="background:#34d399; color:#fff; font-size:9px; font-weight:800; padding:4px 10px; border-radius:20px;">TERKIRIM</div>
+                        </div>
+                        <div style="font-size:15px; font-weight:800; color:#1e293b; margin-bottom:4px;">SD 04 & 8 Sekolah Lainnya</div>
+                        <div style="font-size:10px; color:#64748b; display:flex; align-items:center; gap:4px; margin-bottom:4px;"><i class="ph ph-map-pin"></i> Jl. Kebon Jeruk No. 12</div>
+                        <div style="font-size:10px; color:#64748b; display:flex; align-items:center; gap:4px; margin-bottom:16px;"><i class="ph ph-user"></i> Gabungan Pengurus</div>
+                        
+                        <div style="border-top: 1px solid #f1f5f9; padding-top:12px; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-size:9px; font-weight:700; color:#94a3b8; letter-spacing:0.5px;">PORSI HARIAN</div>
+                                <div style="font-size:18px; font-weight:800; color:#1e3a8a;">1,500</div>
+                            </div>
+                            <i class="ph ph-caret-right" style="color:#1e3a8a; font-size:16px;"></i>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- DAPUR 3: MAN AMAL -->
+            <details class="school-group">
+                <summary>
+                    <div style="width:32px; height:32px; border-radius:8px; background:#fef3c7; color:#d97706; display:flex; justify-content:center; align-items:center;"><i class="ph-fill ph-house"></i></div>
+                    <div style="flex:1;">
+                        <div style="font-size:15px;">Dapur: MAN AMAL</div>
+                        <div style="font-size:11px; color:#64748b; font-weight:500;">6 Sekolah (980 Porsi)</div>
+                    </div>
+                    <i class="ph ph-caret-down" style="color:#64748b;"></i>
+                </summary>
+                <div class="details-content">
+                    <div class="school-card">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                            <div style="width:36px; height:36px; background:#1e3a8a; color:#fff; border-radius:8px; display:flex; justify-content:center; align-items:center;">
+                                <i class="ph-fill ph-graduation-cap" style="font-size:20px;"></i>
+                            </div>
+                            <div style="background:#fee2e2; color:#ef4444; font-size:9px; font-weight:800; padding:4px 10px; border-radius:20px;">MENUNGGU</div>
+                        </div>
+                        <div style="font-size:15px; font-weight:800; color:#1e293b; margin-bottom:4px;">SD 33 & 5 Sekolah Lainnya</div>
+                        <div style="font-size:10px; color:#64748b; display:flex; align-items:center; gap:4px; margin-bottom:4px;"><i class="ph ph-map-pin"></i> Area Pasar Baru</div>
+                        <div style="font-size:10px; color:#64748b; display:flex; align-items:center; gap:4px; margin-bottom:16px;"><i class="ph ph-user"></i> Gabungan Pengurus</div>
+                        
+                        <div style="border-top: 1px solid #f1f5f9; padding-top:12px; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-size:9px; font-weight:700; color:#94a3b8; letter-spacing:0.5px;">PORSI HARIAN</div>
+                                <div style="font-size:18px; font-weight:800; color:#1e3a8a;">980</div>
+                            </div>
+                            <i class="ph ph-caret-right" style="color:#1e3a8a; font-size:16px;"></i>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+        </div>
+    </div>
+    
+    <!-- 4. SCREEN PENGEMUDI -->
+    <div id="screen-pengemudi" class="screen" style="background-color: #F8FAFC; color: #1e293b;">
+        <div style="padding: 20px; padding-bottom: 120px; overflow-y: auto;">
+            
+            <!-- Profil Driver -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px 16px; margin-bottom: 16px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                <div style="position: relative; display: inline-block; margin-bottom: 16px;">
+                    <img id="profil-pengemudi-img" src="https://images.unsplash.com/photo-1543165365-07232ed12fad?auto=format&fit=crop&w=150&h=150" style="width: 80px; height: 80px; border-radius: 16px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); background: #6EE7B7; color: #064E3B; font-size: 10px; font-weight: 800; padding: 4px 12px; border-radius: 20px; white-space: nowrap; display: flex; align-items: center; gap: 4px;">
+                        <i class="ph-fill ph-check-circle"></i> Aktif
+                    </div>
+                </div>
+                <h3 id="profil-pengemudi-nama" style="margin: 0 0 4px 0; color: #1e3a8a; font-size: 20px; font-weight: 800;">Budi Santoso</h3>
+                <p id="profil-pengemudi-dapur" style="margin: 0 0 20px 0; color: #64748b; font-size: 11px;">ID Pengemudi: MBG-99281 • Driver SPPG HULLER MAMA</p>
+                
+                <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                    <div style="flex: 1; background: #E0E7FF; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center;">
+                        <div style="font-size: 10px; color: #4F46E5; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;"><i class="ph-fill ph-star" style="color:#d97706;"></i> Penilaian Performa</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #1e3a8a;">4.92 / 5.0</div>
+                    </div>
+                    <div style="flex: 1; background: #E0E7FF; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center;">
+                        <div style="font-size: 10px; color: #4F46E5; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;"><i class="ph-fill ph-truck"></i> Total Pengiriman</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #1e3a8a;">1.284</div>
+                    </div>
+                </div>
+                
+                <button style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: #0B2447; color: #fff; font-weight: 600; font-family: 'Outfit'; margin-bottom: 8px; cursor: pointer;">Edit Profil</button>
+                <button style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #0B2447; font-weight: 600; font-family: 'Outfit'; cursor: pointer;">Unduh Laporan KPI</button>
+            </div>
+
+            <!-- Tren Performa -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+                    <h3 style="margin: 0; color: #1e3a8a; font-size: 15px; font-weight: 800; max-width: 150px;">Tren Performa Mingguan</h3>
+                    <div style="background: #E0E7FF; color: #4F46E5; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 6px;">Sen - Min</div>
+                </div>
+                
+                <!-- Bar Chart -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; height: 120px; margin-bottom: 16px; padding: 0 10px;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 12%;">
+                        <div style="width: 100%; background: #e2e8f0; border-radius: 4px 4px 0 0; height: 40px;"></div>
+                        <span style="font-size: 10px; font-weight: 700; color: #64748b;">S</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 12%;">
+                        <div style="width: 100%; background: #e2e8f0; border-radius: 4px 4px 0 0; height: 60px;"></div>
+                        <span style="font-size: 10px; font-weight: 700; color: #64748b;">S</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 12%;">
+                        <div style="width: 100%; background: #e2e8f0; border-radius: 4px 4px 0 0; height: 80px;"></div>
+                        <span style="font-size: 10px; font-weight: 700; color: #64748b;">R</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 12%;">
+                        <div style="width: 100%; background: #0B2447; border-radius: 4px 4px 0 0; height: 120px; box-shadow: 0 -4px 10px rgba(11, 36, 71, 0.2);"></div>
+                        <span style="font-size: 10px; font-weight: 800; color: #1e3a8a;">K</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 12%;">
+                        <div style="width: 100%; background: #e2e8f0; border-radius: 4px 4px 0 0; height: 90px;"></div>
+                        <span style="font-size: 10px; font-weight: 700; color: #64748b;">J</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 12%;">
+                        <div style="width: 100%; background: #e2e8f0; border-radius: 4px 4px 0 0; height: 50px;"></div>
+                        <span style="font-size: 10px; font-weight: 700; color: #64748b;">S</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 12%;">
+                        <div style="width: 100%; background: #e2e8f0; border-radius: 4px 4px 0 0; height: 30px;"></div>
+                        <span style="font-size: 10px; font-weight: 700; color: #64748b;">M</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; border-top: 1px solid #f1f5f9; padding-top: 12px; font-size: 10px; color: #64748b;">
+                    <div>Efisiensi Rute: <span style="font-weight: 700; color:#1e293b;">94%</span></div>
+                    <div>Ketepatan Waktu: <span style="font-weight: 700; color:#10b981;">+12% vs minggu lalu</span></div>
+                </div>
+            </div>
+
+            <!-- Skor Efisiensi -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                <h3 style="margin: 0 0 4px 0; color: #1e3a8a; font-size: 15px; font-weight: 800;">Skor Efisiensi</h3>
+                <p style="margin: 0 0 20px 0; color: #64748b; font-size: 10px;">Bahan Bakar & Emisi</p>
+                
+                <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+                    <div style="width: 120px; height: 120px; border-radius: 50%; border: 8px solid #0B2447; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                        <div style="font-size: 32px; font-weight: 800; color: #1e293b;">85</div>
+                        <div style="font-size: 10px; color: #64748b; font-weight: 600;">Peringkat A</div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 8px;">
+                    <span style="color: #64748b;">Konsumsi Rata-rata</span>
+                    <span style="font-weight: 800; color: #1e293b;">12,4 km/L</span>
+                </div>
+                <div style="height: 6px; background: #e0e7ff; border-radius: 4px; overflow: hidden;">
+                    <div style="width: 85%; height: 100%; background: #059669; border-radius: 4px;"></div>
+                </div>
+            </div>
+
+            <!-- Status Dokumen -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                <h3 style="margin: 0 0 16px 0; color: #1e3a8a; font-size: 15px; font-weight: 800;">Status Dokumen</h3>
+                
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                    <div style="width: 32px; height: 32px; background: #d1fae5; color: #059669; border-radius: 8px; display: flex; justify-content: center; align-items: center;"><i class="ph-fill ph-identification-card" style="font-size: 18px;"></i></div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 12px; font-weight: 800; color: #1e293b;">SIM B1 Umum</div>
+                        <div style="font-size: 10px; color: #64748b;">Kedaluwarsa: 14 Okt 2026</div>
+                    </div>
+                    <div style="background: #6EE7B7; color: #064E3B; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 20px;">Aktif</div>
+                </div>
+                
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                    <div style="width: 32px; height: 32px; background: #d1fae5; color: #059669; border-radius: 8px; display: flex; justify-content: center; align-items: center;"><i class="ph-fill ph-file-text" style="font-size: 18px;"></i></div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 12px; font-weight: 800; color: #1e293b;">STNK B 9012 UI</div>
+                        <div style="font-size: 10px; color: #64748b;">Kedaluwarsa: 22 Des 2024</div>
+                    </div>
+                    <div style="background: #6EE7B7; color: #064E3B; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 20px;">Aktif</div>
+                </div>
+                
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 32px; height: 32px; background: #ffedd5; color: #d97706; border-radius: 8px; display: flex; justify-content: center; align-items: center;"><i class="ph-fill ph-first-aid" style="font-size: 18px;"></i></div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 12px; font-weight: 800; color: #1e293b;">KIR Berkala</div>
+                        <div style="font-size: 10px; color: #64748b;">Perlu diperbarui dlm 14 hari</div>
+                    </div>
+                    <div style="background: #fde68a; color: #92400e; font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 20px;">Mendekati</div>
+                </div>
+            </div>
+
+            <!-- Riwayat -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                <h3 style="margin: 0 0 16px 0; color: #1e3a8a; font-size: 15px; font-weight: 800;">Riwayat Pengiriman Terakhir</h3>
+                
+                <div style="display: flex; justify-content: space-between; font-size: 10px; font-weight: 700; color: #64748b; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+                    <div style="flex: 2;">Tujuan</div>
+                    <div style="flex: 1;">Waktu</div>
+                    <div style="width: 50px; text-align: right;">Status</div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 12px;">
+                    <div style="flex: 2;">
+                        <div style="font-size: 12px; font-weight: 800; color: #1e293b; margin-bottom: 2px;">SMA 1 Guntal</div>
+                        <div style="font-size: 9px; color: #64748b;">350 Paket MBG</div>
+                    </div>
+                    <div style="flex: 1; font-size: 11px; color: #64748b;">08:15 AM</div>
+                    <div style="width: 50px; text-align: right;">
+                        <span style="background: #6EE7B7; color: #064E3B; font-size: 9px; font-weight: 800; padding: 4px 8px; border-radius: 20px;">Selesai</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 12px;">
+                    <div style="flex: 2;">
+                        <div style="font-size: 12px; font-weight: 800; color: #1e293b; margin-bottom: 2px;">SMK Talang</div>
+                        <div style="font-size: 9px; color: #64748b;">300 Paket MBG</div>
+                    </div>
+                    <div style="flex: 1; font-size: 11px; color: #64748b;">09:30 AM</div>
+                    <div style="width: 50px; text-align: right;">
+                        <span style="background: #6EE7B7; color: #064E3B; font-size: 9px; font-weight: 800; padding: 4px 8px; border-radius: 20px;">Selesai</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div style="flex: 2;">
+                        <div style="font-size: 12px; font-weight: 800; color: #1e293b; margin-bottom: 2px;">SMP 2 Guntal</div>
+                        <div style="font-size: 9px; color: #64748b;">250 Paket MBG</div>
+                    </div>
+                    <div style="flex: 1; font-size: 11px; color: #64748b;">10:45 AM</div>
+                    <div style="width: 50px; text-align: right;">
+                        <span style="background: #6EE7B7; color: #064E3B; font-size: 9px; font-weight: 800; padding: 4px 8px; border-radius: 20px;">Selesai</span>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; font-size: 11px; font-weight: 700; color: #1e3a8a; cursor: pointer; padding-top: 8px;">Lihat Semua Riwayat</div>
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- 5. SCREEN NOTIFIKASI -->
+    <div id="screen-notifikasi" class="screen" style="background-color: #F8FAFC; color: #1e293b;">
+        <div style="padding: 20px; padding-bottom: 120px; overflow-y: auto;">
+            
+            <h2 style="margin: 0 0 4px 0; font-size: 28px; color: #1e3a8a; font-weight: 800; line-height: 1.2;">Notifikasi &<br>Peringatan</h2>
+            <p style="margin: 0 0 20px 0; font-size: 12px; color: #64748b;">Status real-time dan pemantauan armada MBG.</p>
+            
+            <div style="display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;">
+                <div style="background: #e0e7ff; color: #1e3a8a; font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 8px; border: 1px solid #c7d2fe; display: flex; align-items: center; gap: 6px;">
+                    <div style="width:16px; height:16px; border-radius:50%; background:#1e3a8a; color:#fff; display:flex; justify-content:center; align-items:center; font-size:10px;">i</div> 12 Info Baru
+                </div>
+                <div style="background: #ffedd5; color: #9a3412; font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 8px; border: 1px solid #fed7aa; display: flex; align-items: center; gap: 6px;">
+                    <i class="ph-fill ph-warning" style="font-size:14px;"></i> 5 Peringatan
+                </div>
+                <div style="background: #fee2e2; color: #991b1b; font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 8px; border: 1px solid #fecaca; display: flex; align-items: center; gap: 6px;">
+                    <i class="ph-fill ph-warning-circle" style="font-size:14px;"></i> 2 Mendesak
+                </div>
+            </div>
+
+            <!-- Notif 1 (Mendesak) -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-left: 4px solid #ef4444; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: #fee2e2; color: #ef4444; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
+                    <i class="ph-fill ph-warning-diamond" style="font-size: 20px;"></i>
+                </div>
+                <div style="flex: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #1e293b; line-height: 1.3;">Kendaraan MBG-TX-088 butuh servis segera</div>
+                        <div style="font-size: 9px; color: #64748b; white-space: nowrap; margin-left: 12px; text-align: right;">2 mnt<br>yang<br>lalu</div>
+                    </div>
+                    <p style="font-size: 11px; color: #64748b; margin: 0 0 12px 0; line-height: 1.5;">Sensor mesin mendeteksi tekanan oli rendah. Segera arahkan ke bengkel rekanan terdekat untuk pengecekan.</p>
+                    <div style="display: flex; gap: 8px;">
+                        <button style="background: #1e3a8a; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; font-family: 'Outfit'; cursor: pointer;">Cari Bengkel</button>
+                        <button style="background: #fff; color: #64748b; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; font-family: 'Outfit'; cursor: pointer;">Abaikan</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notif 2 (Peringatan) -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-left: 4px solid #f59e0b; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: #fef3c7; color: #d97706; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
+                    <i class="ph-fill ph-clock" style="font-size: 20px;"></i>
+                </div>
+                <div style="flex: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #1e293b; line-height: 1.3;">Rute #A-202 mengalami keterlambatan</div>
+                        <div style="font-size: 9px; color: #64748b; white-space: nowrap; margin-left: 12px; text-align: right;">15 mnt<br>yang<br>lalu</div>
+                    </div>
+                    <p style="font-size: 11px; color: #64748b; margin: 0 0 12px 0; line-height: 1.5;">Kepadatan lalu lintas di area Sudirman. Estimasi waktu tiba (ETA) mundur 20 menit dari jadwal awal.</p>
+                    <div style="font-size: 11px; font-weight: 700; color: #1e3a8a; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                        <i class="ph ph-map-trifold" style="font-size: 14px;"></i> Lihat Jalur Alternatif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notif 3 (Sukses) -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-left: 4px solid #10b981; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: #d1fae5; color: #059669; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
+                    <i class="ph-fill ph-check-circle" style="font-size: 20px;"></i>
+                </div>
+                <div style="flex: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #1e293b; line-height: 1.3;">Sekolah SDN 05 telah menerima paket</div>
+                        <div style="font-size: 9px; color: #64748b; white-space: nowrap; margin-left: 12px; text-align: right;">1 jam<br>yang<br>lalu</div>
+                    </div>
+                    <p style="font-size: 11px; color: #64748b; margin: 0 0 12px 0; line-height: 1.5;">Konfirmasi penerimaan 250 box makanan telah divalidasi oleh Kepala Sekolah. Status rute: Selesai.</p>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 36px; height: 36px; border-radius: 6px; background: url('https://images.unsplash.com/photo-1568044852337-9acc0b741042?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80') center/cover;"></div>
+                        <div style="font-size: 9px; color: #94a3b8;">Bukti_Terima_SDN05.jpg</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notif 4 (Info) -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 24px; display: flex; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: #e0e7ff; color: #4F46E5; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
+                    <i class="ph-fill ph-truck" style="font-size: 20px;"></i>
+                </div>
+                <div style="flex: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #1e293b; line-height: 1.3;">Driver Budi Santoso memulai shift</div>
+                        <div style="font-size: 9px; color: #64748b; white-space: nowrap; margin-left: 12px; text-align: right;">3 jam<br>yang<br>lalu</div>
+                    </div>
+                    <p style="font-size: 11px; color: #64748b; margin: 0; line-height: 1.5;">Kendaraan MBG-TX-045 telah meninggalkan depo Jakarta Pusat menuju rute area Menteng.</p>
+                </div>
+            </div>
+
+            <!-- Peta Peringatan Aktif -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+                <div style="font-size: 10px; font-weight: 700; color: #64748b; padding: 12px 16px; letter-spacing: 0.5px;">LOKASI PERINGATAN AKTIF</div>
+                <div style="height: 140px; background: url('https://www.google.com/maps/about/images/mymaps/mymaps-desktop-16x9.png') center/cover; position: relative;">
+                    <!-- Overlay darkish filter -->
+                    <div style="position: absolute; inset: 0; background: rgba(30, 41, 59, 0.6);"></div>
+                    <!-- Radar Ping -->
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                        <div style="width: 16px; height: 16px; background: #ef4444; border-radius: 50%; border: 2px solid #fff; position: relative; z-index: 2;"></div>
+                        <div style="width: 48px; height: 48px; background: rgba(239, 68, 68, 0.4); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); animation: pulse 2s infinite;"></div>
+                    </div>
+                </div>
+                <div style="padding: 12px 16px; font-size: 10px; color: #1e293b;">
+                    Terdeteksi kendala di Jl. Jendral Sudirman. 2 kendaraan terjebak macet.
+                </div>
+                <style>@keyframes pulse { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(2); opacity: 0; } }</style>
+            </div>
+
+            <!-- Kesehatan Armada -->
+            <div style="background: #0b1f50; border-radius: 16px; padding: 20px; color: #fff;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                    <i class="ph-fill ph-wrench" style="color: #60a5fa; font-size: 20px;"></i>
+                    <div style="font-size: 14px; font-weight: 700;">Kesehatan Armada</div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px;">
+                    <div>Armada Siap Jalan</div>
+                    <div style="font-weight: 700;">92%</div>
+                </div>
+                <div style="height: 6px; background: rgba(255,255,255,0.2); border-radius: 4px; overflow: hidden; margin-bottom: 12px;">
+                    <div style="width: 92%; height: 100%; background: #34d399; border-radius: 4px;"></div>
+                </div>
+                <div style="font-size: 9px; color: #94a3b8;">
+                    3 kendaraan sedang dalam perbaikan rutin hari ini.
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- SCREEN DAPUR -->
+    <div id="screen-dapur" class="screen" style="background-color: #F8FAFC; color: #1e293b;">
+        <div style="padding: 20px; padding-bottom: 120px; overflow-y: auto;">
+            <h2 style="margin: 0 0 4px 0; font-size: 24px; color: #1e3a8a; font-weight: 800;">Data Dapur</h2>
+            <p style="margin: 0 0 20px 0; font-size: 12px; color: #64748b;">Daftar Satuan Pelayanan Pangan Gizi (SPPG) aktif di Kabupaten Solok.</p>
+
+            <!-- Dapur 1 -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; margin-bottom: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                <div style="background: #1e3a8a; padding: 16px 20px; display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink:0;">
+                        <i class="ph-fill ph-cooking-pot" style="font-size: 22px; color: #fff;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 14px; font-weight: 800; color: #fff;">SPPG HULLER MAMA</div>
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 2px;">Dapur Pusat · Kec. Gunung Talang</div>
+                    </div>
+                    <div style="margin-left: auto; background: #34d399; color: #064e3b; font-size: 9px; font-weight: 800; padding: 4px 8px; border-radius: 20px;">AKTIF</div>
+                </div>
+                <div style="padding: 16px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <div style="font-size: 10px; color: #64748b; font-weight: 700;">KAPASITAS PORSI</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #1e293b;">1.020</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; color: #64748b; font-weight: 700;">SEKOLAH BINAAN</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #1e293b;">4 Sekolah</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; color: #64748b; font-weight: 700;">PIC / PENGELOLA</div>
+                        <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px;">Ibu Helvira</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; color: #64748b; font-weight: 700;">ARMADA</div>
+                        <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px;">3 Kendaraan</div>
+                    </div>
+                </div>
+                <div style="margin: 0 16px 16px; background: #f8fafc; border-radius: 10px; padding: 12px;">
+                    <div style="font-size: 10px; font-weight: 700; color: #64748b; margin-bottom: 8px;">SEKOLAH BINAAN</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                        <div style="background: #e0e7ff; color: #1e3a8a; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px;">SMA 1 Guntal</div>
+                        <div style="background: #e0e7ff; color: #1e3a8a; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px;">SMK Talang</div>
+                        <div style="background: #e0e7ff; color: #1e3a8a; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px;">SMP 2 Guntal</div>
+                        <div style="background: #e0e7ff; color: #1e3a8a; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px;">SD 08</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dapur 2 -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; margin-bottom: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                <div style="background: #0f766e; padding: 16px 20px; display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink:0;">
+                        <i class="ph-fill ph-cooking-pot" style="font-size: 22px; color: #fff;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 14px; font-weight: 800; color: #fff;">YAYASAN MITRA NUSA BERBAGI</div>
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 2px;">Dapur Pusat · Kec. Kubung</div>
+                    </div>
+                    <div style="margin-left: auto; background: #34d399; color: #064e3b; font-size: 9px; font-weight: 800; padding: 4px 8px; border-radius: 20px;">AKTIF</div>
+                </div>
+                <div style="padding: 16px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <div style="font-size: 10px; color: #64748b; font-weight: 700;">KAPASITAS PORSI</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #1e293b;">2.450</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; color: #64748b; font-weight: 700;">SEKOLAH BINAAN</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #1e293b;">9 Sekolah</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; color: #64748b; font-weight: 700;">PIC / PENGELOLA</div>
+                        <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px;">Pak Rahmat</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; color: #64748b; font-weight: 700;">ARMADA</div>
+                        <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px;">5 Kendaraan</div>
+                    </div>
+                </div>
+                <div style="margin: 0 16px 16px; background: #f8fafc; border-radius: 10px; padding: 12px;">
+                    <div style="font-size: 10px; font-weight: 700; color: #64748b; margin-bottom: 8px;">SEKOLAH BINAAN (SAMPEL)</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                        <div style="background: #ccfbf1; color: #0f766e; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px;">SD 04</div>
+                        <div style="background: #ccfbf1; color: #0f766e; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px;">SD 29</div>
+                        <div style="background: #ccfbf1; color: #0f766e; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px;">TK Almunawarah</div>
+                        <div style="background: #ccfbf1; color: #0f766e; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px;">+6 lainnya</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dapur 3 -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; margin-bottom: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                <div style="background: #7c3aed; padding: 16px 20px; display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink:0;">
+                        <i class="ph-fill ph-cooking-pot" style="font-size: 22px; color: #fff;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 14px; font-weight: 800; color: #fff;">MAN AMAL</div>
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 2px;">Dapur Pusat · Kec. Lembang Jaya</div>
+                    </div>
+                    <div style="margin-left: auto; background: #fef3c7; color: #92400e; font-size: 9px; font-weight: 800; padding: 4px 8px; border-radius: 20px;">STANDBY</div>
+                </div>
+                <div style="padding: 16px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <div style="font-size: 10px; color: #64748b; font-weight: 700;">KAPASITAS PORSI</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #1e293b;">1.580</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; color: #64748b; font-weight: 700;">SEKOLAH BINAAN</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #1e293b;">6 Sekolah</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; color: #64748b; font-weight: 700;">PIC / PENGELOLA</div>
+                        <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px;">Pak Syafrizal</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; color: #64748b; font-weight: 700;">ARMADA</div>
+                        <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px;">3 Kendaraan</div>
+                    </div>
+                </div>
+                <div style="margin: 0 16px 16px; background: #f8fafc; border-radius: 10px; padding: 12px;">
+                    <div style="font-size: 10px; font-weight: 700; color: #64748b; margin-bottom: 8px;">SEKOLAH BINAAN (SAMPEL)</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                        <div style="background: #ede9fe; color: #7c3aed; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px;">SD 33</div>
+                        <div style="background: #ede9fe; color: #7c3aed; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px;">SD 21</div>
+                        <div style="background: #ede9fe; color: #7c3aed; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px;">MIN 1 Solok</div>
+                        <div style="background: #ede9fe; color: #7c3aed; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px;">+3 lainnya</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Card -->
+            <div style="background: linear-gradient(135deg, #1e3a8a, #4f46e5); border-radius: 16px; padding: 20px; color: #fff;">
+                <div style="font-size: 13px; font-weight: 700; opacity: 0.8; margin-bottom: 16px;">RINGKASAN KAPASITAS TOTAL</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; text-align: center;">
+                    <div>
+                        <div style="font-size: 22px; font-weight: 800;">3</div>
+                        <div style="font-size: 9px; opacity: 0.7; margin-top: 4px;">DAPUR AKTIF</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 22px; font-weight: 800;">5.050</div>
+                        <div style="font-size: 9px; opacity: 0.7; margin-top: 4px;">TOTAL PORSI</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 22px; font-weight: 800;">19</div>
+                        <div style="font-size: 9px; opacity: 0.7; margin-top: 4px;">SEKOLAH</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SCREEN RIWAYAT DISTRIBUSI -->
+    <div id="screen-riwayat" class="screen" style="background-color: #F8FAFC; color: #1e293b;">
+        <div style="padding: 20px; padding-bottom: 120px; overflow-y: auto;">
+            <h2 style="margin: 0 0 4px 0; font-size: 24px; color: #1e3a8a; font-weight: 800;">Riwayat Distribusi</h2>
+            <p style="margin: 0 0 16px 0; font-size: 12px; color: #64748b;">Log seluruh kegiatan pengiriman makanan bergizi.</p>
+
+            <!-- Filter Chips -->
+            <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 16px; scrollbar-width: none;">
+                <div style="background: #1e3a8a; color: #fff; padding: 6px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;">Semua</div>
+                <div style="background: #d1fae5; color: #059669; padding: 6px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;">Sukses</div>
+                <div style="background: #fee2e2; color: #dc2626; padding: 6px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;">Gagal</div>
+                <div style="background: #fef3c7; color: #92400e; padding: 6px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;">Terlambat</div>
+            </div>
+
+            <!-- Tanggal 1 -->
+            <div style="font-size: 11px; font-weight: 800; color: #64748b; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Hari Ini · 16 Juli 2026</div>
+
+            <!-- Riwayat Item 1 -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-left: 4px solid #10b981; border-radius: 12px; padding: 16px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <div>
+                        <div style="font-size: 14px; font-weight: 800; color: #1e293b;">SMA 1 Guntal</div>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Dari: SPPG HULLER MAMA</div>
+                    </div>
+                    <div style="background: #d1fae5; color: #059669; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 20px;">SUKSES</div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px;">
+                    <div style="text-align: center; background: #f8fafc; border-radius: 8px; padding: 8px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #1e3a8a;">350</div>
+                        <div style="font-size: 9px; color: #64748b;">Porsi</div>
+                    </div>
+                    <div style="text-align: center; background: #f8fafc; border-radius: 8px; padding: 8px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #1e3a8a;">07:45</div>
+                        <div style="font-size: 9px; color: #64748b;">Jam Tiba</div>
+                    </div>
+                    <div style="text-align: center; background: #f8fafc; border-radius: 8px; padding: 8px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #1e3a8a;">38 m</div>
+                        <div style="font-size: 9px; color: #64748b;">Durasi</div>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #64748b; margin-top: 10px; display: flex; align-items: center; gap: 6px;">
+                    <i class="ph ph-user-circle" style="font-size: 14px;"></i> Pak Yanta · #RT-8821
+                </div>
+            </div>
+
+            <!-- Riwayat Item 2 -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-left: 4px solid #10b981; border-radius: 12px; padding: 16px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <div>
+                        <div style="font-size: 14px; font-weight: 800; color: #1e293b;">SMP 2 Guntal</div>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Dari: SPPG HULLER MAMA</div>
+                    </div>
+                    <div style="background: #d1fae5; color: #059669; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 20px;">SUKSES</div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px;">
+                    <div style="text-align: center; background: #f8fafc; border-radius: 8px; padding: 8px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #1e3a8a;">250</div>
+                        <div style="font-size: 9px; color: #64748b;">Porsi</div>
+                    </div>
+                    <div style="text-align: center; background: #f8fafc; border-radius: 8px; padding: 8px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #1e3a8a;">08:30</div>
+                        <div style="font-size: 9px; color: #64748b;">Jam Tiba</div>
+                    </div>
+                    <div style="text-align: center; background: #f8fafc; border-radius: 8px; padding: 8px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #1e3a8a;">42 m</div>
+                        <div style="font-size: 9px; color: #64748b;">Durasi</div>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #64748b; margin-top: 10px; display: flex; align-items: center; gap: 6px;">
+                    <i class="ph ph-user-circle" style="font-size: 14px;"></i> Budi Santoso · #RT-8822
+                </div>
+            </div>
+
+            <!-- Riwayat Item 3 (Terlambat) -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-left: 4px solid #f59e0b; border-radius: 12px; padding: 16px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <div>
+                        <div style="font-size: 14px; font-weight: 800; color: #1e293b;">SD 04 Kubung</div>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Dari: YAYASAN MITRA NUSA</div>
+                    </div>
+                    <div style="background: #fef3c7; color: #92400e; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 20px;">TERLAMBAT</div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px;">
+                    <div style="text-align: center; background: #f8fafc; border-radius: 8px; padding: 8px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #1e3a8a;">400</div>
+                        <div style="font-size: 9px; color: #64748b;">Porsi</div>
+                    </div>
+                    <div style="text-align: center; background: #f8fafc; border-radius: 8px; padding: 8px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #f59e0b;">09:18</div>
+                        <div style="font-size: 9px; color: #64748b;">Jam Tiba</div>
+                    </div>
+                    <div style="text-align: center; background: #f8fafc; border-radius: 8px; padding: 8px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #f59e0b;">+18 m</div>
+                        <div style="font-size: 9px; color: #64748b;">Keterlambatan</div>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #64748b; margin-top: 10px; display: flex; align-items: center; gap: 6px;">
+                    <i class="ph ph-user-circle" style="font-size: 14px;"></i> Pak Febri · #RT-8823
+                </div>
+            </div>
+
+            <!-- Tanggal 2 -->
+            <div style="font-size: 11px; font-weight: 800; color: #64748b; margin: 16px 0 10px; text-transform: uppercase; letter-spacing: 0.5px;">Kemarin · 15 Juli 2026</div>
+
+            <!-- Riwayat Item 4 -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-left: 4px solid #10b981; border-radius: 12px; padding: 16px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <div>
+                        <div style="font-size: 14px; font-weight: 800; color: #1e293b;">SMK Talang</div>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Dari: SPPG HULLER MAMA</div>
+                    </div>
+                    <div style="background: #d1fae5; color: #059669; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 20px;">SUKSES</div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px;">
+                    <div style="text-align: center; background: #f8fafc; border-radius: 8px; padding: 8px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #1e3a8a;">300</div>
+                        <div style="font-size: 9px; color: #64748b;">Porsi</div>
+                    </div>
+                    <div style="text-align: center; background: #f8fafc; border-radius: 8px; padding: 8px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #1e3a8a;">07:52</div>
+                        <div style="font-size: 9px; color: #64748b;">Jam Tiba</div>
+                    </div>
+                    <div style="text-align: center; background: #f8fafc; border-radius: 8px; padding: 8px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #1e3a8a;">41 m</div>
+                        <div style="font-size: 9px; color: #64748b;">Durasi</div>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #64748b; margin-top: 10px; display: flex; align-items: center; gap: 6px;">
+                    <i class="ph ph-user-circle" style="font-size: 14px;"></i> Joko · #RT-8801
+                </div>
+            </div>
+
+            <!-- Riwayat Item 5 (Gagal) -->
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-left: 4px solid #ef4444; border-radius: 12px; padding: 16px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <div>
+                        <div style="font-size: 14px; font-weight: 800; color: #1e293b;">TK Almunawarah</div>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Dari: YAYASAN MITRA NUSA</div>
+                    </div>
+                    <div style="background: #fee2e2; color: #dc2626; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 20px;">GAGAL</div>
+                </div>
+                <div style="font-size: 11px; color: #64748b; margin-top: 8px; background: #fee2e2; padding: 10px 12px; border-radius: 8px;">
+                    <i class="ph ph-warning" style="color: #dc2626;"></i> Kendaraan mogok di Jl. Lintas Sumatera. Pengiriman dijadwalkan ulang.
+                </div>
+                <div style="font-size: 11px; color: #64748b; margin-top: 10px; display: flex; align-items: center; gap: 6px;">
+                    <i class="ph ph-user-circle" style="font-size: 14px;"></i> Teteen · #RT-8802
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN PROFIL -->
+    <div id="screen-profil" class="screen" style="background-color: #F8FAFC; color: #1e293b; bottom:85px;">
+        <div style="overflow-y:auto; height:100%; padding-bottom:40px;">
+
+            <!-- Cover & Avatar -->
+            <div style="background:linear-gradient(135deg,#1e3a8a,#4f46e5); height:140px; position:relative; flex-shrink:0;">
+                <div style="position:absolute; bottom:-44px; left:24px; width:88px; height:88px; border-radius:50%; border:4px solid #fff; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.15); background:#e0e7ff;">
+                    <img id="profil-avatar" src="https://ui-avatars.com/api/?name=Admin+MBG&background=1e3a8a&color=fff&size=200" style="width:100%;height:100%;object-fit:cover;">
+                </div>
+                <button onclick="showLogoutModal()" style="position:absolute;right:16px;top:12px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:7px 14px;border-radius:20px;font-family:'Outfit';font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                    <i class="ph ph-sign-out" style="font-size:14px;"></i> Keluar
+                </button>
+            </div>
+
+            <!-- Name & Role -->
+            <div style="padding: 56px 24px 20px;">
+                <div style="font-size:22px;font-weight:800;color:#1e293b;">Admin MBG Solok</div>
+                <div style="font-size:13px;color:#64748b;margin-top:4px;">Administrator Logistik · Kab. Solok</div>
+                <div style="display:flex;gap:8px;margin-top:12px;">
+                    <div style="background:#e0e7ff;color:#1e3a8a;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;">Super Admin</div>
+                    <div style="background:#d1fae5;color:#059669;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;">Aktif</div>
+                </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:#e2e8f0;margin:0 24px 20px;border-radius:16px;overflow:hidden;">
+                <div style="background:#fff;padding:16px;text-align:center;">
+                    <div style="font-size:20px;font-weight:800;color:#1e3a8a;">19</div>
+                    <div style="font-size:9px;color:#64748b;font-weight:700;margin-top:2px;">SEKOLAH</div>
+                </div>
+                <div style="background:#fff;padding:16px;text-align:center;">
+                    <div style="font-size:20px;font-weight:800;color:#1e3a8a;">3</div>
+                    <div style="font-size:9px;color:#64748b;font-weight:700;margin-top:2px;">DAPUR</div>
+                </div>
+                <div style="background:#fff;padding:16px;text-align:center;">
+                    <div style="font-size:20px;font-weight:800;color:#1e3a8a;">98%</div>
+                    <div style="font-size:9px;color:#64748b;font-weight:700;margin-top:2px;">SUKSES</div>
+                </div>
+            </div>
+
+            <!-- Info Section -->
+            <div style="margin:0 24px 16px; background:#fff; border:1px solid #e2e8f0; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.03);">
+                <div style="padding:16px 20px; border-bottom:1px solid #f1f5f9; font-size:11px; font-weight:800; color:#64748b; letter-spacing:0.5px;">INFORMASI AKUN</div>
+
+                <div style="padding:16px 20px; display:flex; align-items:center; gap:16px; border-bottom:1px solid #f1f5f9;">
+                    <div style="width:36px;height:36px;background:#eff6ff;border-radius:10px;display:flex;justify-content:center;align-items:center;flex-shrink:0;">
+                        <i class="ph ph-envelope-simple" style="color:#1e3a8a;font-size:18px;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:10px;color:#64748b;font-weight:700;">EMAIL</div>
+                        <div style="font-size:14px;color:#1e293b;font-weight:600;margin-top:2px;">admin@mbg-solok.go.id</div>
+                    </div>
+                </div>
+
+                <div style="padding:16px 20px; display:flex; align-items:center; gap:16px; border-bottom:1px solid #f1f5f9;">
+                    <div style="width:36px;height:36px;background:#f0fdf4;border-radius:10px;display:flex;justify-content:center;align-items:center;flex-shrink:0;">
+                        <i class="ph ph-phone" style="color:#059669;font-size:18px;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:10px;color:#64748b;font-weight:700;">NO. HP</div>
+                        <div style="font-size:14px;color:#1e293b;font-weight:600;margin-top:2px;">+62 812-7654-3210</div>
+                    </div>
+                </div>
+
+                <div style="padding:16px 20px; display:flex; align-items:center; gap:16px;">
+                    <div style="width:36px;height:36px;background:#fdf4ff;border-radius:10px;display:flex;justify-content:center;align-items:center;flex-shrink:0;">
+                        <i class="ph ph-map-pin" style="color:#9333ea;font-size:18px;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:10px;color:#64748b;font-weight:700;">WILAYAH</div>
+                        <div style="font-size:14px;color:#1e293b;font-weight:600;margin-top:2px;">Kabupaten Solok, Sumatera Barat</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div style="margin:0 24px 16px; background:#fff; border:1px solid #e2e8f0; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.03);">
+                <div style="padding:16px 20px; border-bottom:1px solid #f1f5f9; font-size:11px; font-weight:800; color:#64748b; letter-spacing:0.5px;">PENGATURAN</div>
+
+                <div style="padding:16px 20px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #f1f5f9; cursor:pointer;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <i class="ph ph-bell" style="color:#f59e0b;font-size:20px;"></i>
+                        <span style="font-size:14px;font-weight:600;color:#1e293b;">Notifikasi Push</span>
+                    </div>
+                    <div style="width:40px;height:22px;background:#10b981;border-radius:20px;position:relative;">
+                        <div style="width:18px;height:18px;background:#fff;border-radius:50%;position:absolute;right:2px;top:2px;box-shadow:0 2px 4px rgba(0,0,0,0.2);"></div>
+                    </div>
+                </div>
+
+                <div style="padding:16px 20px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #f1f5f9; cursor:pointer;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <i class="ph ph-lock-key" style="color:#0284c7;font-size:20px;"></i>
+                        <span style="font-size:14px;font-weight:600;color:#1e293b;">Ganti Kata Sandi</span>
+                    </div>
+                    <i class="ph ph-caret-right" style="color:#94a3b8;font-size:18px;"></i>
+                </div>
+
+                <div style="padding:16px 20px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <i class="ph ph-info" style="color:#64748b;font-size:20px;"></i>
+                        <span style="font-size:14px;font-weight:600;color:#1e293b;">Tentang Aplikasi v1.0</span>
+                    </div>
+                    <i class="ph ph-caret-right" style="color:#94a3b8;font-size:18px;"></i>
+                </div>
+            </div>
+
+            <!-- Logout Button -->
+            <div style="margin:0 24px 32px;">
+                <button onclick="showLogoutModal()" style="width:100%;padding:16px;border-radius:14px;border:1.5px solid #fecaca;background:#fff5f5;color:#ef4444;font-size:15px;font-weight:800;font-family:'Outfit';cursor:pointer;display:flex;justify-content:center;align-items:center;gap:10px;">
+                    <i class="ph-fill ph-sign-out" style="font-size:18px;"></i> Keluar dari Akun
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav" id="app-nav" style="display:none;">
+        <style>
+            #app-nav .nav-item { font-size: 9px; padding: 8px 2px; }
+            #app-nav .nav-icon { font-size: 20px; }
+        </style>
+        <div class="nav-item" onclick="changeTab('statistik', 'Laporan Analitik', this)">
+            <i class="ph ph-chart-line-up nav-icon"></i>
+            Analitik
+        </div>
+        <div class="nav-item" onclick="changeTab('dapur', 'Data Dapur', this)">
+            <i class="ph ph-cooking-pot nav-icon"></i>
+            Dapur
+        </div>
+        <div class="nav-item active" onclick="changeTab('rute', 'Optimasi Rute', this)">
+            <i class="ph ph-map-trifold nav-icon"></i>
+            Rute
+        </div>
+        <div class="nav-item" onclick="changeTab('sekolah', 'Data Sekolah', this)">
+            <i class="ph ph-buildings nav-icon"></i>
+            Sekolah
+        </div>
+        <div class="nav-item" onclick="changeTab('riwayat', 'Riwayat Distribusi', this)">
+            <i class="ph ph-clock-clockwise nav-icon"></i>
+            Riwayat
+        </div>
+    </div>
+</div>
+
+<script>
+    // ===================== SPLASH SCREEN =====================
+    window.addEventListener('load', () => {
+        const splash = document.getElementById('screen-splash');
+        setTimeout(() => {
+            splash.style.animation = 'splashFadeOut 0.6s ease forwards';
+            setTimeout(() => {
+                splash.classList.remove('active');
+                splash.style.display = 'none';
+                document.getElementById('screen-login').classList.add('active');
+            }, 600);
+        }, 2500);
+    });
+
+    function doLogin() {
+        document.getElementById('screen-login').classList.remove('active');
+        document.getElementById('screen-rute').classList.add('active');
+        document.getElementById('app-header').style.display = 'flex';
+        document.getElementById('app-nav').style.display = 'flex';
+        document.getElementById('page-title').innerText = 'Optimasi Rute';
+        setTimeout(() => { map.invalidateSize(); }, 100);
+    }
+
+    function showRegister() {
+        document.getElementById('screen-login').classList.remove('active');
+        document.getElementById('screen-register').classList.add('active');
+    }
+
+    function showLogin() {
+        document.getElementById('screen-register').classList.remove('active');
+        document.getElementById('screen-login').classList.add('active');
+    }
+
+    function doRegister() {
+        // Simulasi registrasi berhasil dan otomatis login
+        document.getElementById('screen-register').classList.remove('active');
+        document.getElementById('screen-rute').classList.add('active');
+        document.getElementById('app-header').style.display = 'flex';
+        document.getElementById('app-nav').style.display = 'flex';
+        document.getElementById('page-title').innerText = 'Optimasi Rute';
+        setTimeout(() => { map.invalidateSize(); }, 100);
+    }
+
+    function showLogoutModal() {
+        const modal = document.getElementById('logout-modal');
+        modal.style.display = 'flex';
+    }
+
+    function hideLogoutModal() {
+        const modal = document.getElementById('logout-modal');
+        modal.style.display = 'none';
+    }
+
+    function confirmLogout() {
+        hideLogoutModal();
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-login').classList.add('active');
+        document.getElementById('app-header').style.display = 'none';
+        document.getElementById('app-nav').style.display = 'none';
+    }
+
+    function doLogout() { confirmLogout(); }
+
+    function changeTab(tabId, title, element) {
+        document.getElementById('page-title').innerText = title;
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(t => {
+            t.classList.remove('active');
+            let icon = t.querySelector('i');
+            if(icon) icon.className = icon.className.replace('ph-fill', 'ph');
+        });
+        
+        document.getElementById('screen-' + tabId).classList.add('active');
+        
+        if (element) {
+            element.classList.add('active');
+            let activeIcon = element.querySelector('i');
+            if(activeIcon) activeIcon.className = activeIcon.className.replace('ph ', 'ph-fill ');
+        }
+        
+        if(tabId === 'rute') {
+            setTimeout(() => { map.invalidateSize(); }, 100);
+        }
+    }
+    
+    // Initialize active icon
+    document.querySelector('.nav-item.active i').className = document.querySelector('.nav-item.active i').className.replace('ph ', 'ph-fill ');
+
+    // Initialize map
+    const map = L.map('map', {zoomControl: false}).setView([-0.866000, 100.647000], 14);
+    
+    // Light mode map
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    const routeData = [
+        {
+            dapurId: 0,
+            kitchenName: "SPPG HULLER MAMA",
+            drivers: ["Budi", "Joko", "Agus"],
+            points: [
+                {lat: -0.867226, lng: 100.647346, name: "SPPG HULLER MAMA", type: "dapur"},
+                {lat: -0.865500, lng: 100.648500, name: "SMA 1 Guntal", type: "sekolah", porsi: 350, dist: "0.8 km"},
+                {lat: -0.869000, lng: 100.645000, name: "SMK Talang", type: "sekolah", porsi: 300, dist: "1.2 km"},
+                {lat: -0.864000, lng: 100.650000, name: "SMP 2 Guntal", type: "sekolah", porsi: 250, dist: "2.5 km"},
+                {lat: -0.863000, lng: 100.646000, name: "SD 08", type: "sekolah", porsi: 120, dist: "1.1 km"}
+            ]
+        },
+        {
+            dapurId: 1,
+            kitchenName: "YAYASAN MITRA NUSA BERBAGI",
+            drivers: ["Pak Yanta", "Pak Febri", "Anton", "Teteen", "Julda"],
+            points: [
+                {lat: -0.879000, lng: 100.650000, name: "YAYASAN MITRA NUSA", type: "dapur"},
+                {lat: -0.877000, lng: 100.652000, name: "SD 04", type: "sekolah", porsi: 400, dist: "1.0 km"},
+                {lat: -0.880000, lng: 100.648000, name: "SD 29", type: "sekolah", porsi: 200, dist: "1.5 km"},
+                {lat: -0.882000, lng: 100.655000, name: "TK Almunawarah", type: "sekolah", porsi: 80, dist: "2.1 km"}
+            ]
+        },
+        {
+            dapurId: 2,
+            kitchenName: "MAN AMAL",
+            drivers: ["Pak Firman", "Pak Sam", "Pak Beni"],
+            points: [
+                {lat: -0.885000, lng: 100.640000, name: "MAN AMAL", type: "dapur"},
+                {lat: -0.883000, lng: 100.638000, name: "SD 33", type: "sekolah", porsi: 300, dist: "0.5 km"},
+                {lat: -0.887000, lng: 100.635000, name: "SD 21", type: "sekolah", porsi: 280, dist: "1.2 km"}
+            ]
+        }
+    ];
+
+    let currentPolyline = null;
+    let currentMarkers = [];
+
+    function updateDriverAvatar() {
+        const sel = document.getElementById('driver-select');
+        const name = sel.value;
+        const nameQuery = name.replace(/ /g, '+');
+        const avatarUrl = `https://ui-avatars.com/api/?name=${nameQuery}&background=3b82f6&color=fff`;
+        document.getElementById('driver-avatar').src = avatarUrl;
+        
+        // Update Pengemudi Dashboard
+        const dapurSelect = document.getElementById('dapur-select');
+        const dapurName = dapurSelect.options[dapurSelect.selectedIndex].text;
+        
+        document.getElementById('profil-pengemudi-nama').innerText = name;
+        document.getElementById('profil-pengemudi-img').src = `https://ui-avatars.com/api/?name=${nameQuery}&background=6EE7B7&color=064E3B`;
+        document.getElementById('profil-pengemudi-dapur').innerText = `ID Pengemudi: MBG-${Math.floor(Math.random() * 90000) + 10000} • Driver ${dapurName}`;
+    }
+
+    function changeDapurRoute() {
+        const id = parseInt(document.getElementById('dapur-select').value);
+        const data = routeData[id];
+        
+        // Update Drivers
+        const driverSel = document.getElementById('driver-select');
+        driverSel.innerHTML = '';
+        data.drivers.forEach(d => {
+            driverSel.innerHTML += `<option value="${d}">${d}</option>`;
+        });
+        updateDriverAvatar();
+
+        // Update Text
+        document.getElementById('rute-count').innerText = `${data.points.length - 1} Titik`;
+
+        // Clear Map
+        if(currentPolyline) map.removeLayer(currentPolyline);
+        currentMarkers.forEach(m => map.removeLayer(m));
+        currentMarkers = [];
+
+        // Build List and Map
+        const listContainer = document.getElementById('route-list');
+        listContainer.innerHTML = '';
+        
+        const latlngs = [];
+        data.points.forEach((p, index) => {
+            latlngs.push([p.lat, p.lng]);
+            const isDapur = p.type === 'dapur';
+            
+            // Build Card
+            if(isDapur) {
+                listContainer.innerHTML += `
+                    <div class="card kitchen" onclick="focusMap(${p.lat}, ${p.lng}, '${p.name}')">
+                        <div class="card-header"><div class="card-title">1. ${p.name}</div><div class="badge">Dapur</div></div>
+                        <div class="card-subtitle"><i class="ph ph-map-pin"></i> Titik Keberangkatan</div>
+                    </div>`;
+            } else {
+                listContainer.innerHTML += `
+                    <div class="card" onclick="focusMap(${p.lat}, ${p.lng}, '${p.name}')">
+                        <div class="card-header"><div class="card-title">${index + 1}. ${p.name}</div><div class="badge">${p.porsi} Porsi</div></div>
+                        <div class="card-subtitle"><i class="ph ph-car-profile"></i> ${p.dist} dari titik sblmnya</div>
+                    </div>`;
+            }
+
+            // Build Marker
+            const color = isDapur ? '#10B981' : '#4F46E5';
+            const size = isDapur ? 24 : 18;
+            const markerHtml = `
+                <div style="
+                    background-color: ${color}; 
+                    width: ${size}px; height: ${size}px; 
+                    border-radius: 50%; 
+                    border: 3px solid #1a1b2e; 
+                    box-shadow: 0 0 15px ${color};
+                    display: flex; justify-content: center; align-items: center;
+                    color: white; font-size: 11px; font-weight: bold; font-family:'Outfit'
+                ">${isDapur ? '<i class="ph-fill ph-house"></i>' : index}</div>`;
+                
+            const icon = L.divIcon({ html: markerHtml, className: '', iconSize: [size+6, size+6] });
+            const marker = L.marker([p.lat, p.lng], {icon: icon})
+                .bindPopup(`<b style="font-family:'Outfit'; font-size:14px;">${p.name}</b><br><span style="color:#9ca3af">${isDapur ? 'Dapur Pusat' : 'Sekolah Tujuan'}</span>`)
+                .addTo(map);
+            currentMarkers.push(marker);
+        });
+
+        // Add return to dapur card
+        const p0 = data.points[0];
+        listContainer.innerHTML += `
+            <div class="card kitchen" onclick="focusMap(${p0.lat}, ${p0.lng}, '${p0.name}')">
+                <div class="card-header"><div class="card-title">${data.points.length + 1}. ${p0.name}</div><div class="badge">Selesai</div></div>
+                <div class="card-subtitle"><i class="ph ph-flag-checkered"></i> Kembali ke Dapur</div>
+            </div>
+            
+            <button onclick="mulaiRute()" style="width:100%; margin-top:20px; padding:16px; border-radius:16px; border:none; background: linear-gradient(135deg, #4F46E5, #3b82f6); color:#fff; font-family:'Outfit'; font-size:16px; font-weight:800; cursor:pointer; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3); display:flex; justify-content:center; align-items:center; gap:8px;">
+                <i class="ph-fill ph-rocket" style="font-size:20px;"></i> MULAI RUTE SEKARANG
+            </button>`;
+            
+        // Map Polyline
+        latlngs.push([p0.lat, p0.lng]); // return to start
+        currentPolyline = L.polyline(latlngs, {
+            color: '#818cf8', weight: 4, opacity: 0.9, dashArray: '8, 8', lineJoin: 'round'
+        }).addTo(map);
+        
+        map.fitBounds(currentPolyline.getBounds(), {padding: [30, 30]});
+    }
+
+    // Initialize first load
+    changeDapurRoute();
+
+    function mulaiRute() {
+        const driverName = document.getElementById('driver-select').value;
+        const dapurSelect = document.getElementById('dapur-select');
+        const dapurName = dapurSelect.options[dapurSelect.selectedIndex].text;
+
+        const toast = document.createElement('div');
+        toast.innerHTML = `
+            <div style="position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#10b981; color:#fff; padding:16px 20px; border-radius:12px; font-family:'Outfit'; font-size:14px; font-weight:600; box-shadow:0 10px 25px rgba(0,0,0,0.2); z-index:9999; display:flex; align-items:center; gap:12px; animation: slideDown 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
+                <i class="ph-fill ph-check-circle" style="font-size:24px;"></i>
+                <div>
+                    <div style="font-weight:800; font-size:16px; margin-bottom:2px;">Berangkat!</div>
+                    Driver <b>${driverName}</b> memulai pengiriman rute ini.
+                </div>
+            </div>
+            <style>
+                @keyframes slideDown { 0% { top: -100px; opacity: 0; } 100% { top: 40px; opacity: 1; } }
+            </style>
+        `;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'all 0.5s';
+            setTimeout(() => toast.remove(), 500);
+        }, 4000);
+
+        // Tambah notifikasi baru ke dalam container Notifikasi
+        const notifContainer = document.querySelector('#screen-notifikasi > div');
+        const newNotif = document.createElement('div');
+        newNotif.innerHTML = `
+            <div style="background: #fff; border: 1px solid #e2e8f0; border-left: 4px solid #3b82f6; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); animation: fadeIn 0.5s ease;">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: #eff6ff; color: #3b82f6; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
+                    <i class="ph-fill ph-rocket" style="font-size: 20px;"></i>
+                </div>
+                <div style="flex: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                        <div style="font-size: 15px; font-weight: 800; color: #1e293b; line-height: 1.3;">Armada Berangkat</div>
+                        <div style="font-size: 9px; color: #64748b; white-space: nowrap; margin-left: 12px; text-align: right;">Baru saja</div>
+                    </div>
+                    <p style="font-size: 11px; color: #64748b; margin: 0; line-height: 1.5;">Driver <b>${driverName}</b> telah memulai rute dari <b>${dapurName}</b>. Status pengiriman: Sedang Jalan.</p>
+                </div>
+            </div>
+        `;
+        notifContainer.insertBefore(newNotif.firstElementChild, notifContainer.children[3]);
+
+        // Aktifkan badge bell agar lebih realistis
+        const bellBadge = document.querySelector('.ph-bell').nextElementSibling;
+        if(bellBadge) {
+            bellBadge.style.display = 'block';
+            bellBadge.style.animation = 'pulse 1s infinite';
+        }
+    }
+
+    let activePopup = null;
+    function focusMap(lat, lng, name) {
+        map.flyTo([lat, lng], 17, {duration: 0.8});
+        if(activePopup) map.closePopup(activePopup);
+        activePopup = L.popup({offset: [0, -10]})
+            .setLatLng([lat, lng])
+            .setContent(`<b style="font-family:'Outfit'; font-size:14px; color:#818cf8;">${name}</b>`)
+            .openOn(map);
+    }
+    
+    // Initialize Chart
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    
+    // Create gradient
+    let gradient = ctx.createLinearGradient(0, 0, 0, 130);
+    gradient.addColorStop(0, 'rgba(30,58,138, 0.3)');
+    gradient.addColorStop(1, 'rgba(30,58,138, 0.0)');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+            datasets: [
+                {
+                    label: 'Sukses',
+                    data: [20, 35, 40, 75, 120, 95, 130],
+                    borderColor: '#1e3a8a',
+                    backgroundColor: gradient,
+                    borderWidth: 3,
+                    tension: 0.5,
+                    fill: true,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#1e3a8a',
+                    pointBorderWidth: 2,
+                    pointHoverRadius: 6
+                },
+                {
+                    label: 'Gagal',
+                    data: [5, 4, 6, 2, 8, 4, 3],
+                    borderColor: '#ef4444',
+                    borderWidth: 2,
+                    tension: 0.5,
+                    borderDash: [4, 4],
+                    fill: false,
+                    pointRadius: 0
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+                legend: { display: false },
+                tooltip: { 
+                    mode: 'index', intersect: false, 
+                    backgroundColor: 'rgba(15,23,42,0.9)', 
+                    titleFont: {family: 'Outfit', size: 11}, 
+                    bodyFont: {family: 'Outfit', size: 11}, 
+                    padding: 10, cornerRadius: 8,
+                    usePointStyle: true
+                } 
+            },
+            scales: {
+                y: { display: false, min: 0 },
+                x: { 
+                    grid: { display: false, drawBorder: false }, 
+                    ticks: { color: '#94a3b8', font: {family: 'Outfit', size: 10, weight: 600} } 
+                }
+            },
+            interaction: { mode: 'nearest', axis: 'x', intersect: false }
+        }
+    });
+</script>
+
+</body>
+</html>

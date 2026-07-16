@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — Sistem Distribusi MBG</title>
+  <meta name="description" content="Dashboard Sistem Penjadwalan dan Rute Distribusi Makanan Bergizi Gratis (MBG)"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🍱</div>
+      <div class="logo-text">
+        <h3>Distribusi MBG</h3>
+        <span>Sistem Rute Optimal</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-label">Menu Utama</div>
+      <a class="nav-item active" href="dashboard.html" id="nav-dashboard">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a class="nav-item" href="optimasi.html" id="nav-optimasi">
+        <span class="nav-icon">🗺️</span> Optimasi Rute
+      </a>
+      <a class="nav-item" href="riwayat.html" id="nav-riwayat">
+        <span class="nav-icon">📋</span> Riwayat Distribusi
+      </a>
+
+      <div class="nav-label" style="margin-top:16px">Manajemen Data</div>
+      <a class="nav-item" href="data-dapur.html" id="nav-dapur">
+        <span class="nav-icon">🏠</span> Data Dapur
+      </a>
+      <a class="nav-item" href="data-sekolah.html" id="nav-sekolah">
+        <span class="nav-icon">🏫</span> Data Sekolah
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user" id="userMenu">
+        <div class="user-avatar" id="userAvatar">A</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">Admin</div>
+          <div class="user-role">Administrator</div>
+        </div>
+      </div>
+      <a class="nav-item" href="#" id="logoutBtn" style="margin-top:4px">
+        <span class="nav-icon">🚪</span> Keluar
+      </a>
+    </div>
+  </aside>
+
+  <!-- ══ MAIN ══ -->
+  <div class="main-content">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="btn btn-secondary btn-sm" id="menuToggle" style="display:none">☰</button>
+      <h2 class="topbar-title">Dashboard Overview</h2>
+      <div class="topbar-status">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusText">Mengecek koneksi...</span>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="page" id="mainPage">
+
+      <!-- Greeting -->
+      <div class="mb-3">
+        <h1 id="greeting">Selamat Datang! 👋</h1>
+        <p>Sistem Penjadwalan &amp; Rute Distribusi <strong>Makanan Bergizi Gratis (MBG)</strong></p>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card" style="--stat-color:#10B981;--stat-rgb:16,185,129">
+          <div class="stat-icon">🏠</div>
+          <div>
+            <div class="stat-label">Total Dapur</div>
+            <div class="stat-value" id="statDapur">—</div>
+            <div class="stat-sub">Dapur aktif terdaftar</div>
+          </div>
+        </div>
+        <div class="stat-card" style="--stat-color:#3B82F6;--stat-rgb:59,130,246">
+          <div class="stat-icon">🏫</div>
+          <div>
+            <div class="stat-label">Total Sekolah</div>
+            <div class="stat-value" id="statSekolah">—</div>
+            <div class="stat-sub">Sekolah penerima MBG</div>
+          </div>
+        </div>
+        <div class="stat-card" style="--stat-color:#F59E0B;--stat-rgb:245,158,11">
+          <div class="stat-icon">🍱</div>
+          <div>
+            <div class="stat-label">Porsi Harian</div>
+            <div class="stat-value" id="statPorsi">—</div>
+            <div class="stat-sub">Total porsi seluruh sekolah</div>
+          </div>
+        </div>
+        <div class="stat-card" style="--stat-color:#8B5CF6;--stat-rgb:139,92,246">
+          <div class="stat-icon">🛣️</div>
+          <div>
+            <div class="stat-label">Distribusi Tercatat</div>
+            <div class="stat-value" id="statDistribusi">—</div>
+            <div class="stat-sub">Total rute dijalankan</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid: Peta + Riwayat -->
+      <div class="grid-2" style="gap:20px">
+
+        <!-- Peta overview -->
+        <div class="card" style="grid-column: 1 / -1;">
+          <div class="card-header">
+            <h3 class="card-title">🗺️ Peta Lokasi Dapur &amp; Sekolah</h3>
+            <a href="optimasi.html" class="btn btn-primary btn-sm">➕ Buat Rute Baru</a>
+          </div>
+          <div id="map"></div>
+          <div class="text-sm text-muted mt-1">📍 Klik marker untuk info detail. Hijau = Dapur, Biru = Sekolah.</div>
+        </div>
+
+      </div>
+
+      <!-- Riwayat terbaru -->
+      <div class="card mt-3">
+        <div class="card-header">
+          <h3 class="card-title">🕐 5 Distribusi Terakhir</h3>
+          <a href="riwayat.html" class="btn btn-secondary btn-sm">Lihat Semua</a>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Dapur</th>
+                <th>Tanggal</th>
+                <th>Total Jarak</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="recentTable">
+              <tr><td colspan="5" class="text-center text-muted" style="padding:24px">Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-box">
+    <div class="spinner-lg"></div>
+    <p>Memuat dashboard...</p>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/api.js"></script>
+<script>
+  // Auth guard
+  if (!isLoggedIn()) window.location.href = 'index.html';
+
+  // ── UI Helpers ──────────────────────────
+  function showToast(msg, type = 'info') {
+    const tc = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+    t.innerHTML = `<span>${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+    tc.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  function setLoading(v) {
+    document.getElementById('loadingOverlay').classList.toggle('show', v);
+  }
+
+  // ── User Info ────────────────────────────
+  const user = JSON.parse(sessionStorage.getItem('mbg_user') || '{}');
+  document.getElementById('userName').textContent = user.username || 'Admin';
+  document.getElementById('userAvatar').textContent = (user.username || 'A')[0].toUpperCase();
+
+  const hour = new Date().getHours();
+  const greetWord = hour < 12 ? 'Selamat Pagi' : hour < 15 ? 'Selamat Siang' : hour < 18 ? 'Selamat Sore' : 'Selamat Malam';
+  document.getElementById('greeting').textContent = `${greetWord}, ${user.username || 'Admin'}! 👋`;
+
+  document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout(); });
+
+  // Responsive sidebar toggle
+  if (window.innerWidth <= 768) {
+    document.getElementById('menuToggle').style.display = 'flex';
+    document.getElementById('menuToggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
+    });
+  }
+
+  // ── Health Check ─────────────────────────
+  async function checkStatus() {
+    try {
+      const h = await checkHealth();
+      const dot = document.getElementById('statusDot');
+      const txt = document.getElementById('statusText');
+      if (h.database === 'connected') {
+        dot.style.background = '#10B981';
+        txt.textContent = 'Database MySQL terhubung';
+      } else {
+        dot.style.background = '#F59E0B';
+        txt.textContent = 'Mode sample data (MySQL offline)';
+      }
+    } catch {
+      document.getElementById('statusDot').style.background = '#EF4444';
+      document.getElementById('statusText').textContent = 'Backend offline';
+    }
+  }
+
+  // ── Map Init ─────────────────────────────
+  const map = L.map('map', { zoomControl: true }).setView([-0.867, 100.647], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 18
+  }).addTo(map);
+
+  const iconDapur = L.divIcon({
+    html: '<div style="background:#10B981;color:white;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:18px;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.4)">🏠</div>',
+    iconSize: [34, 34], iconAnchor: [17, 17], className: ''
+  });
+  const iconSekolah = L.divIcon({
+    html: '<div style="background:#3B82F6;color:white;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:15px;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.4)">🏫</div>',
+    iconSize: [30, 30], iconAnchor: [15, 15], className: ''
+  });
+
+  async function loadMapData() {
+    try {
+      const [dRes, sRes] = await Promise.all([getDapur(), getSekolah()]);
+      const allMarkers = [];
+      dRes.data.forEach(d => {
+        const m = L.marker([d.latitude, d.longitude], { icon: iconDapur })
+          .bindPopup(`<strong>${d.nama_dapur}</strong><br>📍 ${parseFloat(d.latitude).toFixed(4)}, ${parseFloat(d.longitude).toFixed(4)}`)
+          .addTo(map);
+        allMarkers.push(m);
+      });
+      sRes.data.forEach(s => {
+        const m = L.marker([s.latitude, s.longitude], { icon: iconSekolah })
+          .bindPopup(`<strong>${s.nama_sekolah}</strong><br>🍱 Porsi: ${s.porsi_mbg}<br>📍 ${parseFloat(s.latitude).toFixed(4)}, ${parseFloat(s.longitude).toFixed(4)}`)
+          .addTo(map);
+        allMarkers.push(m);
+      });
+      if (allMarkers.length > 0) {
+        map.fitBounds(L.featureGroup(allMarkers).getBounds(), { padding: [40, 40], maxZoom: 15 });
+      }
+    } catch (e) {
+      showToast('Gagal memuat data peta: ' + e.message, 'error');
+    }
+  }
+
+  // ── Dashboard Stats ───────────────────────
+  async function loadDashboard() {
+    setLoading(true);
+    try {
+      const data = await getDashboard();
+
+      document.getElementById('statDapur').textContent = data.total_dapur;
+      document.getElementById('statSekolah').textContent = data.total_sekolah;
+      const porsiVal = data.total_porsi_harian;
+      document.getElementById('statPorsi').textContent = (typeof porsiVal === 'number') ? porsiVal.toLocaleString('id-ID') : (porsiVal || '—');
+      document.getElementById('statDistribusi').textContent = data.total_distribusi_tercatat;
+
+      // Riwayat terbaru
+      const tbody = document.getElementById('recentTable');
+      if (data.riwayat_terbaru && data.riwayat_terbaru.length > 0) {
+        tbody.innerHTML = data.riwayat_terbaru.map((r, i) => `
+          <tr>
+            <td>${r.id_rute || (i + 1)}</td>
+            <td>${r.nama_dapur || 'Dapur #' + r.id_dapur}</td>
+            <td>${r.tanggal_distribusi}</td>
+            <td><span class="text-primary-color font-bold">${parseFloat(r.total_jarak_km || 0).toFixed(2)} km</span></td>
+            <td><span class="badge badge-green">✓ Selesai</span></td>
+          </tr>`).join('');
+      } else {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted" style="padding:24px">Belum ada riwayat distribusi. <a href="optimasi.html" style="color:var(--primary)">Buat rute sekarang →</a></td></tr>';
+      }
+
+      showToast('Dashboard berhasil dimuat', 'success');
+    } catch (e) {
+      showToast('Error: ' + e.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // ── Init ─────────────────────────────────
+  (async () => {
+    await Promise.all([checkStatus(), loadDashboard(), loadMapData()]);
+  })();
+</script>
+</body>
+</html>

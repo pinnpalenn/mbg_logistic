@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — Sistem Distribusi MBG</title>
+  <meta name="description" content="Login ke Sistem Penjadwalan dan Rute Distribusi Makanan Bergizi Gratis (MBG)"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    .login-footer { text-align:center; margin-top:28px; font-size:0.78rem; color:var(--text-muted); }
+    .login-footer a { color:var(--primary); }
+    .error-msg { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); border-radius:var(--radius-md); padding:10px 14px; font-size:0.85rem; color:var(--danger); margin-bottom:16px; display:none; }
+    .error-msg.show { display:block; }
+    .demo-hint { background:rgba(16,185,129,0.07); border:1px solid rgba(16,185,129,0.2); border-radius:var(--radius-md); padding:10px 14px; font-size:0.8rem; color:var(--text-secondary); margin-bottom:20px; line-height:1.6; }
+    .demo-hint strong { color:var(--primary); }
+    .input-group { position:relative; }
+    .input-group .toggle-pw { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px; padding:4px; }
+    .particles { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+    .particle { position:absolute; width:2px; height:2px; background:var(--primary); border-radius:50%; opacity:0.4; animation:float-up linear infinite; }
+    @keyframes float-up {
+      0%   { transform:translateY(100vh) scale(0); opacity:0; }
+      10%  { opacity:0.4; }
+      90%  { opacity:0.4; }
+      100% { transform:translateY(-10px) scale(1); opacity:0; }
+    }
+  </style>
+</head>
+<body>
+<div class="login-page">
+  <div class="login-bg"></div>
+  <div class="particles" id="particles"></div>
+
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-circle">🍱</div>
+      <h1>Sistem Rute MBG</h1>
+      <p>Makanan Bergizi Gratis — Distribusi Optimal</p>
+    </div>
+
+    <div class="demo-hint">
+      💡 Demo login: <strong>admin</strong> / <strong>mbg2025</strong>
+    </div>
+
+    <div class="error-msg" id="errorMsg">
+      ⚠️ Username atau password salah. Coba lagi.
+    </div>
+
+    <form id="loginForm" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="username">Username</label>
+        <input id="username" class="form-control" type="text" placeholder="Masukkan username" autocomplete="username" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <div class="input-group">
+          <input id="password" class="form-control" type="password" placeholder="Masukkan password" autocomplete="current-password" required style="padding-right:44px"/>
+          <button type="button" class="toggle-pw" id="togglePw" title="Tampilkan password">👁️</button>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block btn-lg" type="submit" id="loginBtn">
+        <span id="loginBtnText">Masuk ke Sistem</span>
+        <span class="spinner hidden" id="loginSpinner"></span>
+      </button>
+    </form>
+
+    <div class="login-footer">
+      Sistem Distribusi MBG &copy; 2025 · Capstone Project
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+  // Redirect jika sudah login
+  if (isLoggedIn()) window.location.href = 'dashboard.html';
+
+  // Partikel animasi background
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (8 + Math.random() * 12) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    p.style.width = p.style.height = (1 + Math.random() * 3) + 'px';
+    container.appendChild(p);
+  }
+
+  // Toggle password visibility
+  document.getElementById('togglePw').addEventListener('click', function () {
+    const pw = document.getElementById('password');
+    if (pw.type === 'password') { pw.type = 'text'; this.textContent = '🙈'; }
+    else { pw.type = 'password'; this.textContent = '👁️'; }
+  });
+
+  // Login form
+  document.getElementById('loginForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const btn = document.getElementById('loginBtn');
+    const spinner = document.getElementById('loginSpinner');
+    const btnText = document.getElementById('loginBtnText');
+    const errMsg = document.getElementById('errorMsg');
+
+    if (!username || !password) return;
+
+    btn.disabled = true;
+    btnText.textContent = 'Masuk...';
+    spinner.classList.remove('hidden');
+    errMsg.classList.remove('show');
+
+    try {
+      await login(username, password);
+      btnText.textContent = '✓ Berhasil!';
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 500);
+    } catch (err) {
+      errMsg.classList.add('show');
+      btn.disabled = false;
+      btnText.textContent = 'Masuk ke Sistem';
+      spinner.classList.add('hidden');
+    }
+  });
+</script>
+</body>
+</html>

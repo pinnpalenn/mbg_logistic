@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Riwayat Distribusi — Sistem MBG</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div class="app-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🍱</div>
+      <div class="logo-text"><h3>Distribusi MBG</h3><span>Sistem Rute Optimal</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Menu Utama</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+      <a class="nav-item" href="optimasi.html"><span class="nav-icon">🗺️</span> Optimasi Rute</a>
+      <a class="nav-item active" href="riwayat.html"><span class="nav-icon">📋</span> Riwayat Distribusi</a>
+      <div class="nav-label" style="margin-top:16px">Manajemen Data</div>
+      <a class="nav-item" href="data-dapur.html"><span class="nav-icon">🏠</span> Data Dapur</a>
+      <a class="nav-item" href="data-sekolah.html"><span class="nav-icon">🏫</span> Data Sekolah</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar" id="userAvatar">A</div>
+        <div class="user-info"><div class="user-name" id="userName">Admin</div><div class="user-role">Administrator</div></div>
+      </div>
+      <a class="nav-item" href="#" id="logoutBtn" style="margin-top:4px"><span class="nav-icon">🚪</span> Keluar</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <h2 class="topbar-title">📋 Riwayat Distribusi</h2>
+      <a href="optimasi.html" class="btn btn-primary btn-sm">➕ Buat Rute Baru</a>
+    </header>
+
+    <main class="page">
+      <div class="mb-3">
+        <h1>Riwayat Distribusi MBG</h1>
+        <p>Semua rute distribusi yang telah dihitung dan dijalankan.</p>
+      </div>
+
+      <!-- Filter -->
+      <div class="card mb-3">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+          <div class="form-group" style="margin:0;flex:1;min-width:140px">
+            <label class="form-label">Filter Dapur</label>
+            <select class="form-control" id="filterDapur">
+              <option value="">— Semua Dapur —</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0;flex:1;min-width:140px">
+            <label class="form-label">Cari</label>
+            <input class="form-control" type="text" id="searchInput" placeholder="Cari nama dapur atau urutan..."/>
+          </div>
+          <button class="btn btn-secondary" id="btnRefresh">🔄 Refresh</button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">📊 Daftar Riwayat</h3>
+          <span class="badge badge-slate" id="totalCount">0 Record</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Dapur</th>
+                <th>Tanggal</th>
+                <th>Total Jarak</th>
+                <th>Urutan Distribusi</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="riwayatTable">
+              <tr><td colspan="6" class="text-center text-muted" style="padding:32px">
+                <div class="spinner-lg" style="margin:0 auto 12px"></div>
+                Memuat riwayat...
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty state -->
+        <div class="hidden text-center" id="emptyState" style="padding:48px">
+          <div style="font-size:48px;margin-bottom:12px">📭</div>
+          <h3>Belum ada riwayat distribusi</h3>
+          <p style="margin:8px 0 20px">Mulai dengan membuat rute distribusi pertama Anda.</p>
+          <a href="optimasi.html" class="btn btn-primary">🗺️ Buat Rute Sekarang</a>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Modal Konfirmasi Hapus -->
+<div class="loading-overlay" id="deleteModal" style="z-index:10000">
+  <div class="loading-box" style="text-align:left;min-width:360px">
+    <h3 style="margin-bottom:8px">🗑️ Hapus Riwayat?</h3>
+    <p style="margin-bottom:20px">Riwayat distribusi <strong id="deleteTarget"></strong> akan dihapus secara permanen.</p>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-secondary" id="cancelDelete">Batal</button>
+      <button class="btn btn-danger" id="confirmDelete">Hapus</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="js/api.js"></script>
+<script>
+  if (!isLoggedIn()) window.location.href = 'index.html';
+
+  function showToast(msg, type = 'info') {
+    const tc = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<span>${{success:'✅',error:'❌',info:'ℹ️'}[type]||'ℹ️'}</span><span>${msg}</span>`;
+    tc.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  const user = JSON.parse(sessionStorage.getItem('mbg_user') || '{}');
+  document.getElementById('userName').textContent = user.username || 'Admin';
+  document.getElementById('userAvatar').textContent = (user.username || 'A')[0].toUpperCase();
+  document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout(); });
+
+  let allData = [], deleteId = null;
+
+  function truncate(str, n = 70) { return str && str.length > n ? str.slice(0, n) + '...' : str || '-'; }
+
+  function renderTable(data) {
+    const tbody = document.getElementById('riwayatTable');
+    const empty = document.getElementById('emptyState');
+    document.getElementById('totalCount').textContent = `${data.length} Record`;
+
+    if (data.length === 0) {
+      tbody.innerHTML = '';
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    tbody.innerHTML = data.map(r => `
+      <tr>
+        <td><span class="badge badge-slate">#${r.id_rute || '—'}</span></td>
+        <td><strong>${r.nama_dapur || 'Dapur #' + r.id_dapur}</strong></td>
+        <td>${r.tanggal_distribusi || '—'}</td>
+        <td style="white-space:nowrap">
+          <span style="color:var(--primary);font-weight:700">${parseFloat(r.total_jarak_km || 0).toFixed(2)}</span>
+          <span class="text-muted text-sm"> km</span>
+        </td>
+        <td>
+          <div style="max-width:320px;font-size:0.8rem;color:var(--text-muted);overflow:hidden" title="${r.detail_urutan || ''}">
+            ${truncate(r.detail_urutan)}
+          </div>
+        </td>
+        <td>
+          <button class="btn btn-danger btn-sm" onclick="openDelete(${r.id_rute}, '${(r.nama_dapur||'').replace(/'/g,'')}')" ${!r.id_rute ? 'disabled' : ''}>🗑️</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  function applyFilter() {
+    const dapur = document.getElementById('filterDapur').value;
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = allData.filter(r => {
+      const matchDapur = !dapur || String(r.id_dapur) === dapur;
+      const matchQ = !q || (r.nama_dapur || '').toLowerCase().includes(q) || (r.detail_urutan || '').toLowerCase().includes(q);
+      return matchDapur && matchQ;
+    });
+    renderTable(filtered);
+  }
+
+  async function loadData() {
+    try {
+      const res = await getRiwayat();
+      allData = res.data || [];
+      renderTable(allData);
+
+      // Populate filter dapur
+      const dapurSet = [...new Set(allData.map(r => JSON.stringify({ id: r.id_dapur, nama: r.nama_dapur })))].map(s => JSON.parse(s));
+      const filterEl = document.getElementById('filterDapur');
+      filterEl.innerHTML = '<option value="">— Semua Dapur —</option>' +
+        dapurSet.map(d => `<option value="${d.id}">${d.nama || 'Dapur #' + d.id}</option>`).join('');
+    } catch (e) {
+      showToast('Gagal memuat riwayat: ' + e.message, 'error');
+    }
+  }
+
+  // Delete handlers
+  function openDelete(id, namaD) {
+    deleteId = id;
+    document.getElementById('deleteTarget').textContent = `#${id} (${namaD})`;
+    document.getElementById('deleteModal').classList.add('show');
+  }
+  document.getElementById('cancelDelete').addEventListener('click', () => {
+    deleteId = null;
+    document.getElementById('deleteModal').classList.remove('show');
+  });
+  document.getElementById('confirmDelete').addEventListener('click', async () => {
+    if (!deleteId) return;
+    try {
+      await deleteRiwayat(deleteId);
+      showToast(`Riwayat #${deleteId} berhasil dihapus`, 'success');
+      document.getElementById('deleteModal').classList.remove('show');
+      deleteId = null;
+      await loadData();
+    } catch (e) {
+      showToast('Gagal menghapus: ' + e.message, 'error');
+    }
+  });
+
+  document.getElementById('filterDapur').addEventListener('change', applyFilter);
+  document.getElementById('searchInput').addEventListener('input', applyFilter);
+  document.getElementById('btnRefresh').addEventListener('click', loadData);
+
+  loadData();
+</script>
+</body>
+</html>

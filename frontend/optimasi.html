@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Optimasi Rute — Sistem Distribusi MBG</title>
+  <meta name="description" content="Halaman optimasi rute distribusi Makanan Bergizi Gratis menggunakan algoritma TSP dan Dijkstra"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    .opt-layout { display:grid; grid-template-columns:340px 1fr; gap:20px; align-items:start; }
+    .opt-panel { display:flex; flex-direction:column; gap:16px; }
+    .select-all-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+    .result-panel { display:none; }
+    .result-panel.show { display:block; }
+    .route-line-info { background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(59,130,246,0.05)); border:1px solid rgba(16,185,129,0.2); border-radius:var(--radius-md); padding:14px; margin-bottom:12px; font-size:0.85rem; color:var(--text-secondary); }
+    @media(max-width:900px){ .opt-layout { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🍱</div>
+      <div class="logo-text">
+        <h3>Distribusi MBG</h3>
+        <span>Sistem Rute Optimal</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Menu Utama</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+      <a class="nav-item active" href="optimasi.html"><span class="nav-icon">🗺️</span> Optimasi Rute</a>
+      <a class="nav-item" href="riwayat.html"><span class="nav-icon">📋</span> Riwayat Distribusi</a>
+      <div class="nav-label" style="margin-top:16px">Manajemen Data</div>
+      <a class="nav-item" href="data-dapur.html"><span class="nav-icon">🏠</span> Data Dapur</a>
+      <a class="nav-item" href="data-sekolah.html"><span class="nav-icon">🏫</span> Data Sekolah</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar" id="userAvatar">A</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">Admin</div>
+          <div class="user-role">Administrator</div>
+        </div>
+      </div>
+      <a class="nav-item" href="#" id="logoutBtn" style="margin-top:4px"><span class="nav-icon">🚪</span> Keluar</a>
+    </div>
+  </aside>
+
+  <!-- ══ MAIN ══ -->
+  <div class="main-content">
+    <header class="topbar">
+      <h2 class="topbar-title">🗺️ Optimasi Rute Distribusi</h2>
+      <div class="topbar-status">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusText">Backend terhubung</span>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="mb-3">
+        <h1>Hitung Rute Distribusi Optimal</h1>
+        <p>Pilih dapur & sekolah tujuan, lalu klik <strong>Hitung Rute</strong> untuk menemukan urutan distribusi terpendek.</p>
+      </div>
+
+      <div class="opt-layout">
+
+        <!-- Panel Kiri: Input -->
+        <div class="opt-panel">
+
+          <!-- Pilih Dapur -->
+          <div class="card">
+            <h3 class="card-title mb-2">🏠 1. Pilih Dapur Keberangkatan</h3>
+            <div class="form-group" style="margin-bottom:0">
+              <select class="form-control" id="selectDapur">
+                <option value="">— Memuat data dapur... —</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Pilih Sekolah -->
+          <div class="card">
+            <div class="card-header" style="margin-bottom:12px">
+              <h3 class="card-title">🏫 2. Pilih Sekolah Tujuan</h3>
+            </div>
+            <div class="select-all-row">
+              <span class="text-sm text-muted" id="selectedCount">0 sekolah dipilih</span>
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-secondary btn-sm" id="btnSelectAll">Pilih Semua</button>
+                <button class="btn btn-secondary btn-sm" id="btnClearAll">Reset</button>
+              </div>
+            </div>
+            <div class="school-list" id="schoolList">
+              <div class="text-muted text-sm text-center" style="padding:20px">Pilih dapur terlebih dahulu...</div>
+            </div>
+          </div>
+
+          <!-- Tombol Hitung -->
+          <button class="btn btn-primary btn-block btn-lg" id="btnHitung" disabled>
+            <span id="btnHitungText">🚀 Hitung Rute Optimal</span>
+            <span class="spinner hidden" id="btnSpinner"></span>
+          </button>
+
+        </div>
+
+        <!-- Panel Kanan: Peta + Hasil -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+
+          <!-- Peta -->
+          <div class="card" style="padding:16px">
+            <div class="card-header" style="margin-bottom:12px">
+              <h3 class="card-title">📍 Peta Distribusi</h3>
+              <button class="btn btn-secondary btn-sm" id="btnResetMap">Reset Peta</button>
+            </div>
+            <div id="map"></div>
+            <div class="text-sm text-muted mt-1">🟢 Dapur &nbsp; 🔵 Sekolah &nbsp; <span style="color:#F59E0B">🟡 Rute Optimal</span></div>
+          </div>
+
+          <!-- Hasil (tersembunyi sebelum dihitung) -->
+          <div class="card result-panel" id="resultPanel">
+            <div class="card-header" style="margin-bottom:12px">
+              <h3 class="card-title">📋 Hasil Optimasi TSP</h3>
+              <button class="btn btn-secondary btn-sm" id="btnPrintResult">🖨️ Cetak</button>
+            </div>
+
+            <div class="route-line-info" id="routeInfo">
+              Algoritma: TSP Exact + Haversine Distance
+            </div>
+
+            <div class="result-summary" id="resultSummary">
+              <div class="result-metric">
+                <div class="val" id="resJarak">—</div>
+                <div class="lbl">Total Jarak (km)</div>
+              </div>
+              <div class="result-metric">
+                <div class="val" id="resWaktu">—</div>
+                <div class="lbl">Est. Waktu (menit)</div>
+              </div>
+              <div class="result-metric">
+                <div class="val" id="resPorsi">—</div>
+                <div class="lbl">Total Porsi</div>
+              </div>
+            </div>
+
+            <h4 style="font-size:0.88rem;color:var(--text-secondary);margin-bottom:10px">📍 Urutan Kunjungan:</h4>
+            <div class="route-steps" id="routeSteps"></div>
+
+            <div class="mt-2 text-sm text-muted" id="savedStatus"></div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-box">
+    <div class="spinner-lg"></div>
+    <p style="color:var(--text-secondary)">Menghitung rute optimal...</p>
+    <p class="text-sm text-muted mt-1">TSP sedang memproses permutasi rute</p>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/api.js"></script>
+<script>
+  if (!isLoggedIn()) window.location.href = 'index.html';
+
+  // ── Helpers ──────────────────────────────
+  function showToast(msg, type = 'info') {
+    const tc = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+    t.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${msg}</span>`;
+    tc.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+  }
+  function setLoading(v) { document.getElementById('loadingOverlay').classList.toggle('show', v); }
+
+  // ── User ─────────────────────────────────
+  const user = JSON.parse(sessionStorage.getItem('mbg_user') || '{}');
+  document.getElementById('userName').textContent = user.username || 'Admin';
+  document.getElementById('userAvatar').textContent = (user.username || 'A')[0].toUpperCase();
+  document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); logout(); });
+
+  // ── Health ───────────────────────────────
+  checkHealth().then(h => {
+    const dot = document.getElementById('statusDot');
+    const txt = document.getElementById('statusText');
+    dot.style.background = h.database === 'connected' ? '#10B981' : '#F59E0B';
+    txt.textContent = h.database === 'connected' ? 'MySQL terhubung' : 'Mode sample data';
+  }).catch(() => {
+    document.getElementById('statusDot').style.background = '#EF4444';
+    document.getElementById('statusText').textContent = 'Backend offline';
+  });
+
+  // ── Map ──────────────────────────────────
+  const map = L.map('map').setView([-0.867, 100.647], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 18 }).addTo(map);
+
+  const makeIcon = (emoji, color, size = 34) => L.divIcon({
+    html: `<div style="background:${color};color:white;border-radius:50%;width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;font-size:${Math.round(size*0.52)}px;border:3px solid white;box-shadow:0 2px 10px rgba(0,0,0,0.4)">${emoji}</div>`,
+    iconSize: [size, size], iconAnchor: [size/2, size/2], className: ''
+  });
+
+  let allMarkers = [], routeLines = [], routeMarkers = [];
+
+  function clearRouteFromMap() {
+    routeLines.forEach(l => map.removeLayer(l)); routeLines = [];
+    routeMarkers.forEach(m => map.removeLayer(m)); routeMarkers = [];
+  }
+
+  async function initMapMarkers() {
+    try {
+      const [dRes, sRes] = await Promise.all([getDapur(), getSekolah()]);
+      dRes.data.forEach(d => {
+        L.marker([d.latitude, d.longitude], { icon: makeIcon('🏠', '#10B981') })
+          .bindPopup(`<strong>${d.nama_dapur}</strong>`)
+          .addTo(map);
+      });
+      sRes.data.forEach(s => {
+        L.marker([s.latitude, s.longitude], { icon: makeIcon('🏫', '#3B82F6', 30) })
+          .bindPopup(`<strong>${s.nama_sekolah}</strong><br>Porsi: ${s.porsi_mbg}`)
+          .addTo(map);
+      });
+    } catch (e) { showToast('Gagal memuat peta: ' + e.message, 'error'); }
+  }
+
+  function drawRouteOnMap(urutan) {
+    clearRouteFromMap();
+    const coords = urutan.map(u => [u.latitude, u.longitude]);
+    const poly = L.polyline(coords, { color: '#F59E0B', weight: 4, opacity: 0.9, dashArray: '8 4' }).addTo(map);
+    routeLines.push(poly);
+    map.fitBounds(poly.getBounds(), { padding: [40, 40] });
+    urutan.forEach((u, i) => {
+      const isDepot = u.tipe === 'dapur';
+      const m = L.marker([u.latitude, u.longitude], { icon: makeIcon(isDepot ? '🏠' : String(i), isDepot ? '#10B981' : '#F59E0B', 32) })
+        .bindPopup(`<strong>${u.nama}</strong><br>${isDepot ? '📍 Titik keberangkatan' : `Kunjungan ke-${i}`}`)
+        .addTo(map);
+      routeMarkers.push(m);
+    });
+  }
+
+  // ── Dapur Select ─────────────────────────
+  let allDapur = [], allSekolah = [], selectedSchools = new Set();
+
+  async function loadDapur() {
+    const res = await getDapur();
+    allDapur = res.data;
+    const sel = document.getElementById('selectDapur');
+    sel.innerHTML = '<option value="">— Pilih Dapur —</option>' +
+      allDapur.map(d => `<option value="${d.id_dapur}">${d.nama_dapur}</option>`).join('');
+  }
+
+  async function loadSekolahByDapur(idDapur) {
+    selectedSchools.clear();
+    const res = await getSekolah(parseInt(idDapur));
+    allSekolah = res.data;
+    renderSchoolList();
+    updateHitungBtn();
+  }
+
+  function renderSchoolList() {
+    const list = document.getElementById('schoolList');
+    if (allSekolah.length === 0) {
+      list.innerHTML = '<div class="text-muted text-sm text-center" style="padding:16px">Tidak ada sekolah untuk dapur ini.</div>';
+      return;
+    }
+    list.innerHTML = allSekolah.map(s => `
+      <label class="school-item ${selectedSchools.has(s.id_sekolah) ? 'selected' : ''}" data-id="${s.id_sekolah}">
+        <input type="checkbox" ${selectedSchools.has(s.id_sekolah) ? 'checked' : ''} data-id="${s.id_sekolah}" id="chk-${s.id_sekolah}"/>
+        <div class="school-item-info">
+          <div class="school-item-name">${s.nama_sekolah}</div>
+          <div class="school-item-detail">📍 ${s.latitude.toFixed(4)}, ${s.longitude.toFixed(4)}</div>
+        </div>
+        <span class="school-item-porsi">🍱 ${s.porsi_mbg}</span>
+      </label>
+    `).join('');
+
+    list.querySelectorAll('input[type="checkbox"]').forEach(chk => {
+      chk.addEventListener('change', () => {
+        const id = parseInt(chk.dataset.id);
+        if (chk.checked) selectedSchools.add(id); else selectedSchools.delete(id);
+        chk.closest('.school-item').classList.toggle('selected', chk.checked);
+        updateHitungBtn();
+      });
+    });
+  }
+
+  function updateHitungBtn() {
+    const count = selectedSchools.size;
+    document.getElementById('selectedCount').textContent = `${count} sekolah dipilih`;
+    document.getElementById('btnHitung').disabled = count === 0 || !document.getElementById('selectDapur').value;
+  }
+
+  document.getElementById('selectDapur').addEventListener('change', async function () {
+    if (!this.value) return;
+    document.getElementById('schoolList').innerHTML = '<div class="text-muted text-sm text-center" style="padding:16px">Memuat sekolah...</div>';
+    await loadSekolahByDapur(this.value);
+  });
+
+  document.getElementById('btnSelectAll').addEventListener('click', () => {
+    allSekolah.forEach(s => selectedSchools.add(s.id_sekolah));
+    renderSchoolList(); updateHitungBtn();
+  });
+
+  document.getElementById('btnClearAll').addEventListener('click', () => {
+    selectedSchools.clear(); renderSchoolList(); updateHitungBtn();
+    clearRouteFromMap();
+    document.getElementById('resultPanel').classList.remove('show');
+  });
+
+  document.getElementById('btnResetMap').addEventListener('click', () => {
+    clearRouteFromMap(); map.setView([-1.608, 101.480], 13);
+  });
+
+  // ── Hitung Rute ──────────────────────────
+  document.getElementById('btnHitung').addEventListener('click', async () => {
+    const idDapur = parseInt(document.getElementById('selectDapur').value);
+    if (!idDapur || selectedSchools.size === 0) return;
+
+    const btn = document.getElementById('btnHitung');
+    const spinner = document.getElementById('btnSpinner');
+    const btnText = document.getElementById('btnHitungText');
+    btn.disabled = true;
+    spinner.classList.remove('hidden');
+    btnText.textContent = 'Menghitung...';
+    setLoading(true);
+
+    try {
+      const result = await postOptimasi({
+        id_dapur: idDapur,
+        id_sekolah: [...selectedSchools],
+        simpan: true
+      });
+
+      // Tampilkan hasil
+      document.getElementById('resJarak').textContent = result.total_jarak_km.toFixed(2);
+      document.getElementById('resWaktu').textContent = result.estimasi_waktu_menit;
+      const porsiDisplay = typeof result.total_porsi === 'number' ? result.total_porsi.toLocaleString('id-ID') : (result.total_porsi || '—');
+      document.getElementById('resPorsi').textContent = porsiDisplay;
+      document.getElementById('routeInfo').textContent =
+        `📅 ${result.tanggal_distribusi} · Metode: ${result.metode} · Sumber: ${result.source}`;
+
+      // Urutan kunjungan
+      const steps = document.getElementById('routeSteps');
+      steps.innerHTML = result.urutan.map((u, i) => {
+        const isDepot = u.tipe === 'dapur';
+        return `
+          ${i > 0 ? '<div class="route-connector"></div>' : ''}
+          <div class="route-step">
+            <div class="step-num ${isDepot ? 'depot' : ''}">${isDepot ? (i === 0 ? '▶' : '⏹') : i}</div>
+            <span class="step-name">${u.nama}</span>
+            <span class="step-porsi">${u.porsi_mbg > 0 ? '🍱 ' + u.porsi_mbg : ''}</span>
+          </div>`;
+      }).join('');
+
+      if (result.tersimpan_di_mysql !== undefined) {
+        document.getElementById('savedStatus').textContent = result.tersimpan_di_mysql
+          ? '✅ Rute tersimpan ke database MySQL' : '⚠️ Rute disimpan di memori (MySQL tidak tersedia)';
+      }
+
+      // Tampilkan di peta
+      drawRouteOnMap(result.urutan);
+      document.getElementById('resultPanel').classList.add('show');
+      showToast(`Rute optimal ditemukan! Total: ${result.total_jarak_km} km`, 'success');
+
+    } catch (e) {
+      showToast('Gagal menghitung rute: ' + e.message, 'error');
+    } finally {
+      setLoading(false);
+      btn.disabled = false;
+      spinner.classList.add('hidden');
+      btnText.textContent = '🚀 Hitung Rute Optimal';
+    }
+  });
+
+  // ── Print ────────────────────────────────
+  document.getElementById('btnPrintResult').addEventListener('click', () => {
+    const panel = document.getElementById('resultPanel');
+    const printWin = window.open('', '', 'width=800,height=600');
+    printWin.document.write(`
+      <html><head><title>Hasil Optimasi Rute MBG</title>
+      <style>
+        body{font-family:system-ui,sans-serif;padding:24px;color:#1e293b}
+        h2{color:#10b981;border-bottom:2px solid #10b981;padding-bottom:8px}
+        table{width:100%;border-collapse:collapse;margin-top:12px}
+        th,td{border:1px solid #e2e8f0;padding:10px;text-align:left;font-size:13px}
+        th{background:#f1f5f9;font-weight:600}
+        .metric{display:flex;gap:32px;margin:12px 0;padding:12px;background:#f8fafc;border-radius:8px}
+        .metric div{text-align:center}
+        .metric .val{font-size:24px;font-weight:700;color:#10b981}
+        .metric .lbl{font-size:11px;color:#64748b;margin-top:2px}
+        @media print{body{padding:0}}
+      </style></head><body>
+      <h2>🖳️ Hasil Optimasi Rute Distribusi MBG</h2>
+      ${panel.innerHTML}
+      </body></html>`);
+    printWin.document.close();
+    setTimeout(() => printWin.print(), 500);
+  });
+
+  // ── Init ─────────────────────────────────
+  (async () => { await Promise.all([loadDapur(), initMapMarkers()]); })();
+</script>
+</body>
+</html>

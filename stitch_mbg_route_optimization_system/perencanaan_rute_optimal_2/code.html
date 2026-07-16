@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html class="light" lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Perencanaan Rute - MBG Logistics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "on-secondary-container": "#00714d",
+                        "secondary": "#006c49",
+                        "outline-variant": "#c5c5d3",
+                        "surface-tint": "#4059aa",
+                        "primary": "#00236f",
+                        "surface-bright": "#f8f9ff",
+                        "on-surface": "#0b1c30",
+                        "surface-container-highest": "#d3e4fe",
+                        "tertiary": "#3e2400",
+                        "tertiary-fixed": "#ffddb8",
+                        "on-primary-fixed-variant": "#264191",
+                        "surface-container-low": "#eff4ff",
+                        "primary-fixed-dim": "#b6c4ff",
+                        "on-background": "#0b1c30",
+                        "on-secondary-fixed": "#002113",
+                        "on-secondary-fixed-variant": "#005236",
+                        "surface-container": "#e5eeff",
+                        "on-primary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "on-tertiary": "#ffffff",
+                        "primary-container": "#1e3a8a",
+                        "tertiary-container": "#5c3800",
+                        "surface": "#f8f9ff",
+                        "on-tertiary-container": "#ef9900",
+                        "surface-container-high": "#dce9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "on-primary-fixed": "#00164e",
+                        "secondary-container": "#6cf8bb",
+                        "surface-dim": "#cbdbf5",
+                        "on-error-container": "#93000a",
+                        "outline": "#757682",
+                        "surface-variant": "#d3e4fe",
+                        "on-primary-container": "#90a8ff",
+                        "on-tertiary-fixed": "#2a1700",
+                        "inverse-primary": "#b6c4ff",
+                        "inverse-surface": "#213145",
+                        "background": "#f8f9ff",
+                        "primary-fixed": "#dce1ff",
+                        "secondary-fixed-dim": "#4edea3",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-surface-variant": "#444651"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "md": "16px",
+                        "xl": "32px",
+                        "sm": "8px",
+                        "xs": "4px",
+                        "gutter": "20px",
+                        "unit": "4px",
+                        "margin": "24px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "h3": ["Inter"],
+                        "data-mono": ["Inter"],
+                        "h2": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "h1": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "h3": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "data-mono": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                        "h2": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-md": ["13px", {"lineHeight": "18px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "h1": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline flex justify-between items-center w-full px-margin h-16 sticky top-0 z-40">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary dark:text-inverse-primary cursor-pointer">menu</span>
+<h2 class="text-h2 font-h2 font-bold text-primary dark:text-primary-fixed-dim">MBG Logistics</h2>
+</div>
+<div class="flex items-center gap-sm">
+<div class="hidden md:flex gap-md mr-md">
+<span class="text-on-surface-variant dark:text-surface-variant font-label-md text-label-md hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors px-3 py-2 rounded-lg cursor-pointer">Statistik</span>
+<span class="text-primary dark:text-primary-fixed-dim font-bold font-label-md text-label-md hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors px-3 py-2 rounded-lg cursor-pointer">Rute</span>
+<span class="text-on-surface-variant dark:text-surface-variant font-label-md text-label-md hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors px-3 py-2 rounded-lg cursor-pointer">Sekolah</span>
+<span class="text-on-surface-variant dark:text-surface-variant font-label-md text-label-md hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors px-3 py-2 rounded-lg cursor-pointer">Sopir</span>
+</div>
+<img alt="Profil Pengguna" class="w-10 h-10 rounded-full bg-surface-container-highest border border-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUhURfn1MQwE_6dcxLJX09oY3cbRwIvjdh3XiTitQ1L2ScK0U_33sSXg_QO7h_MEHer9BgAA4TyAFRnu-FuqYuke1zUZTpYdqG9Wdkgr55OnOr16IZrHJRuXFrmr5MjNJU6TcK26kWm-qWQzlyon7-tLsZL73nsadYGxI2WOPGvrH8H9Useve5BBu6gGwW2VsmGLgX0125qdHsHizAipEx3A0MP4u9BD33Ed75Lo-_z7bjikGs7BlQXabMo87yPOYPGGrHSd78VEs"/>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 relative flex flex-col md:flex-row overflow-hidden h-[calc(100vh-128px)] md:h-[calc(100vh-64px)]">
+<!-- Sidebar Dashboard (Web Only) -->
+<aside class="hidden md:flex flex-col w-80 bg-surface-container-lowest border-r border-outline-variant p-margin overflow-y-auto shrink-0">
+<div class="mb-lg">
+<h3 class="text-h3 font-h3 text-primary mb-sm">Perencanaan Rute</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Optimalkan logistik untuk jendela distribusi jam 08:00 pagi.</p>
+</div>
+<div class="space-y-md">
+<div class="p-md rounded-xl border border-outline-variant bg-surface shadow-sm">
+<span class="text-label-md font-label-md text-on-surface-variant block mb-xs">GUDANG AKTIF</span>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">warehouse</span>
+<span class="text-body-md font-body-md font-semibold">Pusat Jakarta Hub B2</span>
+</div>
+</div>
+<div class="p-md rounded-xl border border-outline-variant bg-surface shadow-sm">
+<span class="text-label-md font-label-md text-on-surface-variant block mb-xs">MUATAN KENDARAAN</span>
+<div class="w-full bg-surface-container-high h-2 rounded-full mb-xs">
+<div class="bg-secondary h-2 rounded-full" style="width: 72%;"></div>
+</div>
+<div class="flex justify-between">
+<span class="text-body-sm font-body-sm">860 / 1200 unit</span>
+<span class="text-body-sm font-body-sm font-bold text-secondary">72%</span>
+</div>
+</div>
+<button class="w-full py-md px-lg bg-primary text-on-primary rounded-xl font-bold text-body-md flex items-center justify-center gap-sm hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined" data-weight="fill">route</span>
+                    Optimalkan (Dijkstra/TSP)
+                </button>
+</div>
+<div class="mt-xl">
+<h4 class="text-label-md font-label-md text-on-surface-variant uppercase mb-md">KPI Operasional</h4>
+<div class="grid grid-cols-2 gap-sm">
+<div class="p-sm bg-surface-container rounded-lg">
+<span class="text-body-sm font-body-sm block">Kecepatan Rata-rata</span>
+<span class="text-h3 font-h3">34 km/h</span>
+</div>
+<div class="p-sm bg-secondary-container rounded-lg">
+<span class="text-body-sm font-body-sm block text-on-secondary-container">Efisiensi</span>
+<span class="text-h3 font-h3 text-on-secondary-container">94%</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Map Area -->
+<section class="flex-1 relative bg-surface-container-high overflow-hidden">
+<!-- Map Placeholder -->
+<div class="absolute inset-0 bg-[#e5e7eb] overflow-hidden">
+<img class="w-full h-full object-cover grayscale opacity-50" data-alt="Peta gaya satelit profesional Jakarta dengan visualisasi data rute logistik berwarna biru dan hijau. Tanpa label teks." data-location="Jakarta" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPv-p9OWAqpTREVRh8fgpIAcNEb_56gCjlbWNKnwJqrN7LtnNgNpFNgbSg-rV1Zokd_R_ZPIaVs9ldCXfV-6YUxi-ke9uB-3SSrzogc1SYU1xvPCMojNC7ske-M4fZS5WGEUounB_tu6MJn53XRXBK4xafrwKgfJ00vekmjywtVyc942kxj3OhqFDUT-yQAzQnGzTSgl4zHBZ3PsbSYokyQ0kPYrdwpz7QA8BIejn6RAU5uqb1qUIycdd6hIs-0KA0_HvcN2TBKj0"/>
+<!-- Map UI Elements (Simulated) -->
+<div class="absolute inset-0 pointer-events-none">
+<!-- Depot Node -->
+<div class="absolute top-1/4 left-1/3 w-8 h-8 bg-primary rounded-full border-4 border-white shadow-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[16px]">warehouse</span>
+</div>
+<!-- School Nodes -->
+<div class="absolute top-1/2 left-1/2 w-6 h-6 bg-secondary rounded-full border-2 border-white shadow-md"></div>
+<div class="absolute top-1/3 right-1/4 w-6 h-6 bg-secondary rounded-full border-2 border-white shadow-md"></div>
+<div class="absolute bottom-1/4 left-1/2 w-6 h-6 bg-secondary rounded-full border-2 border-white shadow-md"></div>
+<!-- Route Lines (SVG) -->
+<svg class="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+<path class="opacity-60" d="M 33% 25% L 50% 50% L 75% 33% L 50% 75%" fill="none" stroke="#1e3a8a" stroke-dasharray="8,4" stroke-width="3"></path>
+</svg>
+</div>
+</div>
+<!-- Floating Map Controls -->
+<div class="absolute top-md right-md flex flex-col gap-sm">
+<button class="w-10 h-10 bg-surface-container-lowest rounded-lg shadow-md flex items-center justify-center text-primary hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+<button class="w-10 h-10 bg-surface-container-lowest rounded-lg shadow-md flex items-center justify-center text-primary hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<button class="w-10 h-10 bg-surface-container-lowest rounded-lg shadow-md flex items-center justify-center text-primary hover:bg-surface-container transition-colors mt-md">
+<span class="material-symbols-outlined">layers</span>
+</button>
+</div>
+<!-- Mobile Optimize Button (Overlay) -->
+<div class="absolute bottom-4 left-4 right-4 md:hidden">
+<button class="w-full py-4 px-6 bg-primary text-on-primary rounded-full shadow-xl font-bold text-lg flex items-center justify-center gap-3">
+<span class="material-symbols-outlined">auto_fix_high</span>
+                    Optimalkan Rute
+                </button>
+</div>
+</section>
+<!-- Bottom Sheet -->
+<section class="absolute bottom-16 md:bottom-auto md:right-lg md:top-margin md:w-96 bg-surface-container-lowest shadow-2xl md:shadow-lg rounded-t-3xl md:rounded-2xl border-t md:border border-outline-variant z-10 transition-all">
+<div class="px-margin pt-sm pb-md">
+<div class="w-12 h-1.5 bg-outline-variant rounded-full mx-auto mb-md md:hidden"></div>
+<div class="flex justify-between items-center mb-md">
+<h3 class="text-h3 font-h3">Urutan Optimal</h3>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-1 rounded text-body-sm font-bold">4 Perhentian</span>
+</div>
+<div class="space-y-sm max-h-[353px] md:max-h-[530px] overflow-y-auto">
+<!-- Sequence Item 1 -->
+<div class="flex gap-md relative">
+<div class="flex flex-col items-center">
+<div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-[10px] text-white font-bold z-10">1</div>
+<div class="w-0.5 h-full bg-outline-variant"></div>
+</div>
+<div class="flex-1 pb-md">
+<p class="text-body-md font-bold">Gudang Pusat</p>
+<p class="text-body-sm text-on-surface-variant">Keberangkatan: 07:45 WIB</p>
+</div>
+</div>
+<!-- Sequence Item 2 -->
+<div class="flex gap-md relative">
+<div class="flex flex-col items-center">
+<div class="w-6 h-6 rounded-full bg-surface-container-highest border-2 border-secondary flex items-center justify-center text-[10px] text-secondary font-bold z-10">2</div>
+<div class="w-0.5 h-full bg-outline-variant"></div>
+</div>
+<div class="flex-1 pb-md">
+<div class="flex justify-between">
+<p class="text-body-md font-bold">SDN Menteng 01</p>
+<span class="text-body-sm font-data-mono">12 menit</span>
+</div>
+<p class="text-body-sm text-on-surface-variant">240 porsi · Prioritas Tinggi</p>
+</div>
+</div>
+<!-- Sequence Item 3 -->
+<div class="flex gap-md relative">
+<div class="flex flex-col items-center">
+<div class="w-6 h-6 rounded-full bg-surface-container-highest border-2 border-secondary flex items-center justify-center text-[10px] text-secondary font-bold z-10">3</div>
+<div class="w-0.5 h-full bg-outline-variant"></div>
+</div>
+<div class="flex-1 pb-md">
+<div class="flex justify-between">
+<p class="text-body-md font-bold">SMPN 1 Jakarta</p>
+<span class="text-body-sm font-data-mono">18 menit</span>
+</div>
+<p class="text-body-sm text-on-surface-variant">320 porsi · Pengiriman tepat waktu</p>
+</div>
+</div>
+<!-- Sequence Item 4 -->
+<div class="flex gap-md relative">
+<div class="flex flex-col items-center">
+<div class="w-6 h-6 rounded-full bg-surface-container-highest border-2 border-secondary flex items-center justify-center text-[10px] text-secondary font-bold z-10">4</div>
+</div>
+<div class="flex-1">
+<div class="flex justify-between">
+<p class="text-body-md font-bold">SMAN 3 Jakarta</p>
+<span class="text-body-sm font-data-mono">22 menit</span>
+</div>
+<p class="text-body-sm text-on-surface-variant">300 porsi · Estimasi tiba 08:37</p>
+</div>
+</div>
+</div>
+<div class="mt-lg pt-md border-t border-outline-variant grid grid-cols-2 gap-md">
+<div>
+<p class="text-label-md font-label-md text-on-surface-variant">TOTAL WAKTU</p>
+<p class="text-h3 font-h3">1j 12m</p>
+</div>
+<div>
+<p class="text-label-md font-label-md text-on-surface-variant">EFISIENSI BBM</p>
+<p class="text-h3 font-h3 text-secondary">8.2 L/100km</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-sm bg-surface dark:bg-inverse-surface border-t border-outline-variant md:hidden">
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim cursor-pointer">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-label-md font-label-md">Statistik</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-full px-4 py-1 scale-95 transition-transform cursor-pointer">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">map</span>
+<span class="text-label-md font-label-md">Rute</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim cursor-pointer">
+<span class="material-symbols-outlined">domain</span>
+<span class="text-label-md font-label-md">Sekolah</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim cursor-pointer">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="text-label-md font-label-md">Sopir</span>
+</div>
+</nav>
+</body></html>

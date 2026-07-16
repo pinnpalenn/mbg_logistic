@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "error-container": "#ffdad6",
+                  "on-secondary-container": "#00714d",
+                  "secondary": "#006c49",
+                  "outline-variant": "#c5c5d3",
+                  "surface-tint": "#4059aa",
+                  "primary": "#00236f",
+                  "surface-bright": "#f8f9ff",
+                  "on-surface": "#0b1c30",
+                  "surface-container-highest": "#d3e4fe",
+                  "tertiary": "#3e2400",
+                  "tertiary-fixed": "#ffddb8",
+                  "on-primary-fixed-variant": "#264191",
+                  "surface-container-low": "#eff4ff",
+                  "primary-fixed-dim": "#b6c4ff",
+                  "on-background": "#0b1c30",
+                  "on-secondary-fixed": "#002113",
+                  "on-secondary-fixed-variant": "#005236",
+                  "surface-container": "#e5eeff",
+                  "on-primary": "#ffffff",
+                  "error": "#ba1a1a",
+                  "on-secondary": "#ffffff",
+                  "on-tertiary-fixed-variant": "#653e00",
+                  "on-tertiary": "#ffffff",
+                  "primary-container": "#1e3a8a",
+                  "tertiary-container": "#5c3800",
+                  "surface": "#f8f9ff",
+                  "on-tertiary-container": "#ef9900",
+                  "surface-container-high": "#dce9ff",
+                  "surface-container-lowest": "#ffffff",
+                  "inverse-on-surface": "#eaf1ff",
+                  "tertiary-fixed-dim": "#ffb95f",
+                  "on-primary-fixed": "#00164e",
+                  "secondary-container": "#6cf8bb",
+                  "surface-dim": "#cbdbf5",
+                  "on-error-container": "#93000a",
+                  "outline": "#757682",
+                  "surface-variant": "#d3e4fe",
+                  "on-primary-container": "#90a8ff",
+                  "on-tertiary-fixed": "#2a1700",
+                  "inverse-primary": "#b6c4ff",
+                  "inverse-surface": "#213145",
+                  "background": "#f8f9ff",
+                  "primary-fixed": "#dce1ff",
+                  "secondary-fixed-dim": "#4edea3",
+                  "on-error": "#ffffff",
+                  "secondary-fixed": "#6ffbbe",
+                  "on-surface-variant": "#444651"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "md": "16px",
+                  "xl": "32px",
+                  "sm": "8px",
+                  "xs": "4px",
+                  "gutter": "20px",
+                  "unit": "4px",
+                  "margin": "24px",
+                  "lg": "24px"
+          },
+          "fontFamily": {
+                  "h3": ["Inter"],
+                  "data-mono": ["Inter"],
+                  "h2": ["Inter"],
+                  "body-lg": ["Inter"],
+                  "label-md": ["Inter"],
+                  "h1": ["Inter"],
+                  "body-md": ["Inter"],
+                  "body-sm": ["Inter"]
+          },
+          "fontSize": {
+                  "h3": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                  "data-mono": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                  "h2": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                  "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                  "label-md": ["13px", {"lineHeight": "18px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                  "h1": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                  "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                  "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    body { font-family: 'Inter', sans-serif; }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(226, 232, 240, 1);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline flex justify-between items-center px-margin h-16">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary dark:text-inverse-primary cursor-pointer">menu</span>
+<h2 class="text-h2 font-h2 font-bold text-primary dark:text-primary-fixed-dim">MBG Logistics</h2>
+</div>
+<div class="flex items-center gap-md">
+<div class="hidden md:flex gap-md">
+<a class="text-primary dark:text-primary-fixed-dim font-bold font-label-md text-label-md" href="#">Stats</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors px-2 py-1 rounded font-label-md text-label-md" href="#">Routes</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors px-2 py-1 rounded font-label-md text-label-md" href="#">Schools</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-inverse-surface transition-colors px-2 py-1 rounded font-label-md text-label-md" href="#">Drivers</a>
+</div>
+<img alt="User Profile" class="w-10 h-10 rounded-full border-2 border-primary" data-alt="A professional headshot of a logistics manager in a corporate office setting. The lighting is soft and natural, emphasizing a high-trust, reliable professional persona. The background features a blurred modern office with soft blue and white tones to match the corporate logistics branding." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_2lF7HVVX4Ji7nFTZ4mCDs3DWEVX-zuJ8j0zCYAGBDFN1mNGidh7-Vn33dfpWawC_0p6q-D5oFF56wHvZ-QKwpDzF_WDgut87GSuOHY7qY_pwsEb_GAi5xoKLH8LTpBkpQRezj-I3ktN33QnmRsPxG4TKfuoRg6yNUdidB5f7-mrNIhwT8sR9oGw6gSXaaxT_gvg-ekuVuLhUJfzaaGue3TDugGW-knLwHdEyDpK0f6nyLZOJ-Zkxr87d4S1m9En5Sp_Y-s8fpk0"/>
+</div>
+</header>
+<main class="pt-24 px-margin max-w-7xl mx-auto space-y-lg">
+<!-- Bento Grid Section -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Progress Circular Chart Card -->
+<div class="md:col-span-4 glass-card rounded-xl p-lg shadow-sm flex flex-col items-center justify-center space-y-md">
+<h3 class="text-h3 font-h3 self-start text-on-surface">Delivery Progress</h3>
+<div class="relative w-48 h-48">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-container-high" cx="96" cy="96" fill="transparent" r="80" stroke="currentColor" stroke-width="12"></circle>
+<circle class="text-primary" cx="96" cy="96" fill="transparent" r="80" stroke="currentColor" stroke-dasharray="502.65" stroke-dashoffset="125.66" stroke-width="12"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-h1 font-h1 text-primary">75%</span>
+<span class="text-label-md font-label-md text-on-surface-variant uppercase tracking-widest">Complete</span>
+</div>
+</div>
+<p class="text-body-sm font-body-sm text-center text-on-surface-variant">45 out of 60 schools reached today</p>
+</div>
+<!-- Hero Summary Card -->
+<div class="md:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-gutter">
+<div class="bg-primary-container text-on-primary-container p-lg rounded-xl flex flex-col justify-between">
+<div>
+<span class="material-symbols-outlined text-4xl mb-sm" data-icon="domain">domain</span>
+<h1 class="text-h1 font-h1 mt-xs">60</h1>
+<p class="text-body-lg font-body-lg opacity-90">Total Schools to Deliver</p>
+</div>
+<div class="flex items-center gap-xs mt-md text-secondary-container">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-label-md font-label-md">+4 from yesterday</span>
+</div>
+</div>
+<div class="bg-surface-container-high p-lg rounded-xl flex flex-col justify-between border border-outline-variant">
+<div>
+<span class="material-symbols-outlined text-4xl text-primary mb-sm" data-icon="local_shipping">local_shipping</span>
+<h1 class="text-h1 font-h1 text-on-surface mt-xs">24</h1>
+<p class="text-body-lg font-body-lg text-on-surface-variant">Active Drivers</p>
+</div>
+<div class="flex -space-x-2">
+<img class="w-8 h-8 rounded-full border-2 border-surface" data-alt="A diverse portrait of a driver in a professional logistics uniform. The lighting is bright and outdoor, signifying activity and precision in high-pressure delivery operations. Blue and white tones dominate the scene." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBm9HJrVMSAejAXcFM_olUmRjMmcTV5ysEnqihbwhQcHt70MQs1DZ_EEVl6_QyS9T4sKCw0M1i9SWEuuSsZpwR30wbb5NrPZC027elMFuqL9sIkga8rKB7DtdNcIKvb6hSCQdb8OE7NdDkqxl97zlL7w1Te1faWZ63kmfTDrX6wU61OSUms0PXflrP2Zie9mhLWGtG6d2w3HTMNPOtz1MO4TcCoa46azilHVVOwCNbV5Fqu_OHokT_w-1PbOg7ovpo9jjhxgEaoOK0"/>
+<img class="w-8 h-8 rounded-full border-2 border-surface" data-alt="Close-up of a female distribution agent smiling, wearing a corporate logistical cap. The background shows a clean warehouse facility with modern lighting and a reliable, organized atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVy9i6Qu7X3R8gWhUFCGnRViosvMhACp5cGpxe1GqZ8XkYo1FF-KLTck4bCzOZO-COwUkbe68Tn92QNp4pEQE2oNkhrn47O-mVAEW07lzQ4eJ401jcQUN06jWyB1tL2PLsEDHQ9tdmGtY3IOgDOUKhB0wN2u99_Di9JK7T7wybVWNCH62t71n8oIItIvgBvmlUB8UHEZAr1rhZBg3CqB53mpMRU8J0J3VGv10FqggPqQa1OIXb3ziPaTnBffHDCAmr2do7dZA_gFk"/>
+<img class="w-8 h-8 rounded-full border-2 border-surface" data-alt="Professional driver profile picture, masculine, clear daylight, wearing a branded logistics polo shirt. High-quality corporate photography style with a focus on trust and accountability." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfvrkAjo8UJfX5gDeCp6iR1fPJ6RWa2W8T5ih4W9q05iYfnaaqESrjTUWkcb_NqpXEB_uj8dZggGU7IHKBoClfr5gH0r3AYWg6kNCEflJQn3mnpzloCqkBnJlGU-pYALrkoprlODoEBtXEP8kudD-HwF0OBkYyrnXWxJLtzvgL0lp6UlDCuf92RQ7geoTXU-726tHyU5sGhyrhv2JzecoNGT_qGYd4lcsoj3qU31RY03jCd4bfwYJMV7PG7mARV76Cy8TXrvxLGT0"/>
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-primary text-on-primary flex items-center justify-center text-[10px] font-bold">+21</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Map & Route Summary -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- Route List -->
+<div class="lg:col-span-1 glass-card rounded-xl overflow-hidden flex flex-col">
+<div class="p-lg border-b border-outline-variant flex justify-between items-center">
+<h3 class="text-h3 font-h3 text-on-surface">Optimized Routes</h3>
+<span class="text-primary material-symbols-outlined cursor-pointer">settings_suggest</span>
+</div>
+<div class="divide-y divide-outline-variant flex-1 overflow-y-auto max-h-[400px]">
+<!-- Route Item -->
+<div class="p-md hover:bg-surface-container transition-colors cursor-pointer">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-bold text-primary font-body-md text-body-md">Route #A-202</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase">Active</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-sm">Central District • 8 Schools</p>
+<div class="flex items-center gap-sm">
+<div class="flex-1 bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-secondary w-5/6 h-full"></div>
+</div>
+<span class="text-label-md font-label-md text-on-surface">5/6</span>
+</div>
+</div>
+<!-- Route Item -->
+<div class="p-md hover:bg-surface-container transition-colors cursor-pointer">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-bold text-primary font-body-md text-body-md">Route #B-115</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant text-[10px] font-bold uppercase">Pending</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-sm">Northern Outskirts • 12 Schools</p>
+<div class="flex items-center gap-sm">
+<div class="flex-1 bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-secondary w-0 h-full"></div>
+</div>
+<span class="text-label-md font-label-md text-on-surface-variant">0/12</span>
+</div>
+</div>
+<!-- Route Item -->
+<div class="p-md hover:bg-surface-container transition-colors cursor-pointer">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-bold text-primary font-body-md text-body-md">Route #C-304</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase">Active</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-sm">East Bay Area • 6 Schools</p>
+<div class="flex items-center gap-sm">
+<div class="flex-1 bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-secondary w-2/6 h-full"></div>
+</div>
+<span class="text-label-md font-label-md text-on-surface">2/6</span>
+</div>
+</div>
+</div>
+<button class="w-full py-md bg-surface-container-high text-primary font-bold text-label-md hover:bg-surface-container-highest transition-colors">
+          View All Routes
+        </button>
+</div>
+<!-- Map Display -->
+<div class="lg:col-span-2 relative h-[400px] lg:h-auto rounded-xl overflow-hidden border border-outline-variant">
+<div class="absolute inset-0 bg-surface-dim flex items-center justify-center">
+<img alt="Logistics Map" class="w-full h-full object-cover grayscale opacity-40" data-location="Jakarta, Indonesia" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMdobyvxZ-PaYzbdHdpFoEy5Z-9bCQLR9lRV28KuF9eJ3BMBTuD_FjloEEIOcrPXKz2RvAGDO0vv6LhjO1nWct1z6Fs8lNIIB38Lee1ELPxt1ctJOAdrlkAJY_Bhlv_ItgPbXFnnbqPcwKpargoY-mtKdJqkBDCYKpc4koDtCR6sEn519Eu2ovYsN6HBqnsG2TQngTRBSRlCt8hmfbQoqFZPMbJtlI-b3JsmMaS-fpPO-WoK2IG240MMSUXXkNqTl8uoe1EjkSUdY"/>
+<!-- Marker Overlays (Simulated) -->
+<div class="absolute top-1/4 left-1/3 w-8 h-8 bg-primary rounded-full border-4 border-white shadow-lg flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-sm">local_shipping</span>
+</div>
+<div class="absolute bottom-1/3 right-1/4 w-8 h-8 bg-secondary rounded-full border-4 border-white shadow-lg flex items-center justify-center text-on-secondary">
+<span class="material-symbols-outlined text-sm">domain</span>
+</div>
+<div class="absolute top-1/2 right-1/2 w-8 h-8 bg-secondary-container text-on-secondary-container rounded-full border-4 border-white shadow-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">domain</span>
+</div>
+</div>
+<!-- Map Controls -->
+<div class="absolute top-4 right-4 flex flex-col gap-xs">
+<button class="w-10 h-10 bg-white shadow-md rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container"><span class="material-symbols-outlined">add</span></button>
+<button class="w-10 h-10 bg-white shadow-md rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container"><span class="material-symbols-outlined">remove</span></button>
+<button class="w-10 h-10 bg-white shadow-md rounded-lg flex items-center justify-center text-primary hover:bg-surface-container mt-sm"><span class="material-symbols-outlined">my_location</span></button>
+</div>
+<div class="absolute bottom-4 left-4 right-4 glass-card p-sm rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="w-2 h-2 rounded-full bg-secondary animate-pulse"></div>
+<span class="text-body-sm font-body-sm text-on-surface font-medium">Real-time GPS tracking active</span>
+</div>
+<span class="text-[10px] text-on-surface-variant font-mono">LAT: -6.2088 • LNG: 106.8456</span>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-sm bg-surface dark:bg-inverse-surface border-t border-outline-variant shadow-md rounded-t-xl">
+<div class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-full px-4 py-1 scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-label-md font-label-md">Stats</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+<span class="text-label-md font-label-md">Routes</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim">
+<span class="material-symbols-outlined" data-icon="domain">domain</span>
+<span class="text-label-md font-label-md">Schools</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim">
+<span class="material-symbols-outlined" data-icon="local_shipping">local_shipping</span>
+<span class="text-label-md font-label-md">Drivers</span>
+</div>
+</nav>
+<!-- Contextual FAB (Dashboard relevant) -->
+<button class="fixed bottom-24 right-6 md:bottom-10 md:right-10 w-14 h-14 bg-primary text-on-primary rounded-xl shadow-xl flex items-center justify-center hover:opacity-90 transition-opacity z-40">
+<span class="material-symbols-outlined text-3xl">add_road</span>
+</button>
+</body></html>

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+
+<html class="light" lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed-dim": "#ffb95f",
+                      "outline-variant": "#c5c5d3",
+                      "on-tertiary": "#ffffff",
+                      "inverse-surface": "#213145",
+                      "primary-container": "#1e3a8a",
+                      "surface-variant": "#d3e4fe",
+                      "surface-container": "#e5eeff",
+                      "on-error": "#ffffff",
+                      "secondary-fixed-dim": "#4edea3",
+                      "error": "#ba1a1a",
+                      "on-secondary-fixed-variant": "#005236",
+                      "on-secondary-fixed": "#002113",
+                      "tertiary-container": "#5c3800",
+                      "on-secondary": "#ffffff",
+                      "primary": "#00236f",
+                      "on-primary-fixed": "#00164e",
+                      "primary-fixed-dim": "#b6c4ff",
+                      "surface-container-low": "#eff4ff",
+                      "secondary-container": "#6cf8bb",
+                      "background": "#f8f9ff",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary-fixed": "#ffddb8",
+                      "outline": "#757682",
+                      "on-surface": "#0b1c30",
+                      "surface-container-highest": "#d3e4fe",
+                      "on-tertiary-fixed-variant": "#653e00",
+                      "on-secondary-container": "#00714d",
+                      "on-primary-container": "#90a8ff",
+                      "error-container": "#ffdad6",
+                      "surface-dim": "#cbdbf5",
+                      "surface": "#f8f9ff",
+                      "on-tertiary-fixed": "#2a1700",
+                      "on-primary-fixed-variant": "#264191",
+                      "surface-container-high": "#dce9ff",
+                      "secondary": "#006c49",
+                      "on-surface-variant": "#444651",
+                      "secondary-fixed": "#6ffbbe",
+                      "on-error-container": "#93000a",
+                      "tertiary": "#3e2400",
+                      "surface-bright": "#f8f9ff",
+                      "on-primary": "#ffffff",
+                      "surface-tint": "#4059aa",
+                      "primary-fixed": "#dce1ff",
+                      "inverse-on-surface": "#eaf1ff",
+                      "on-background": "#0b1c30",
+                      "inverse-primary": "#b6c4ff",
+                      "on-tertiary-container": "#ef9900"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin": "24px",
+                      "sm": "8px",
+                      "xl": "32px",
+                      "gutter": "20px",
+                      "unit": "4px",
+                      "md": "16px",
+                      "xs": "4px",
+                      "lg": "24px"
+              },
+              "fontFamily": {
+                      "body-lg": ["Inter"],
+                      "body-md": ["Inter"],
+                      "label-md": ["Inter"],
+                      "h2": ["Inter"],
+                      "h3": ["Inter"],
+                      "data-mono": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "h1": ["Inter"]
+              },
+              "fontSize": {
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "label-md": ["13px", {"lineHeight": "18px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "h2": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "h3": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "data-mono": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                      "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                      "h1": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="bg-surface border-b border-outline-variant flex justify-between items-center w-full px-margin h-16 sticky top-0 z-40">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary">menu</span>
+<h1 class="text-h2 font-h2 font-bold text-primary">MBG Logistics</h1>
+</div>
+<div class="flex items-center gap-md">
+<div class="hidden md:flex gap-lg items-center">
+<span class="text-on-surface-variant font-label-md text-label-md cursor-pointer hover:text-primary transition-colors">Beranda</span>
+<span class="text-primary font-bold text-label-md cursor-pointer">Drivers</span>
+<span class="text-on-surface-variant font-label-md text-label-md cursor-pointer hover:text-primary transition-colors">Laporan</span>
+</div>
+<img alt="User Profile" class="w-10 h-10 rounded-full border border-outline-variant object-cover" data-alt="A professional headshot of a Middle-Eastern man in his 40s wearing a clean corporate uniform. The lighting is soft and professional, set against a blurred modern logistics office background. The overall aesthetic is clean, high-trust, and corporate, aligning with a reliable logistics brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrlnBwZqEJWM2lYEsySnZkJ2VR_0kKhsR15P7C-BQSWK9rFfxR72gVHKpJBOeW0iU8XY8Wvz0TvOGaaWfdMwWa07v6-fA_WTqIMSIDvmi3R05vb2Wsr75OZ9-kvKkJ8t0xiPQHmWFsOoEN50P6wD0mgIn3zMMhh-BftC1uMMhFTSKDFHo7E7_aQx4JUsPK7VbL_VrASQichW5bHoHaCJjL9ulnwN9V9wa-EehzzP_P2Lfq28BjZGzoSW54Whas9Hf5XSsRK3hNAzg"/>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-margin pt-lg space-y-lg">
+<!-- Hero Section / Profile Card -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-[0px_2px_4px_rgba(30,58,138,0.05)] flex flex-col md:flex-row gap-lg items-center md:items-start">
+<div class="relative">
+<img alt="Driver Photo" class="w-32 h-32 md:w-40 md:h-40 rounded-xl object-cover shadow-md" data-alt="A portrait of a confident Indonesian male truck driver in his late 30s, smiling warmly while standing beside a clean white logistics truck. He wears a blue polo shirt with a logistics company logo. The lighting is bright morning sun, conveying reliability, experience, and high performance within a modern fleet environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1aIOOuVOtsvHqbX_mPLEoP4OWJAx8tw-CqoNmQwhTzKch3bBC-_Rx58T5WQhljglN0bCZ_RH01NwXVTkhqSMnZsYQInA3ARz_56SUOBMz4WKHIXjrMI1O4h3Ih7KvPDobNVKUo13VhQ4yWCstGDnirbuQCuikyMh8nvLy3xs6n5SQvBY6rU5EY7KVsi4RXUro9my2ty95Dy-iCjRLNgPp5EvLTcIAuEIk2QJ8VWYbTFWxueZbzazJMlAoYv0hOlIhKSrsdrVDDVg"/>
+<div class="absolute -bottom-2 -right-2 bg-secondary-container text-on-secondary-container px-sm py-1 rounded-full text-label-md font-label-md flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                    Aktif
+                </div>
+</div>
+<div class="flex-1 text-center md:text-left space-y-sm">
+<div>
+<h2 class="text-h1 font-h1 text-primary">Budi Santoso</h2>
+<p class="text-body-md text-on-surface-variant">ID Driver: MBG-99281 • Senior Logistics Partner</p>
+</div>
+<div class="flex flex-wrap justify-center md:justify-start gap-md pt-sm">
+<div class="bg-surface-container-high px-md py-sm rounded-lg border border-outline-variant flex items-center gap-sm">
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">star</span>
+<div>
+<p class="text-label-md font-label-md text-on-surface-variant">Rating Performa</p>
+<p class="text-h3 font-h3 text-on-surface">4.92 / 5.0</p>
+</div>
+</div>
+<div class="bg-surface-container-high px-md py-sm rounded-lg border border-outline-variant flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">local_shipping</span>
+<div>
+<p class="text-label-md font-label-md text-on-surface-variant">Total Delivery</p>
+<p class="text-h3 font-h3 text-on-surface">1,284</p>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-sm w-full md:w-auto">
+<button class="bg-primary text-on-primary font-label-md text-label-md px-lg py-md rounded-lg shadow-sm hover:opacity-90 transition-opacity">
+                    Edit Profil
+                </button>
+<button class="bg-surface-container-lowest border border-primary text-primary font-label-md text-label-md px-lg py-md rounded-lg hover:bg-surface-container transition-colors">
+                    Unduh Laporan KPI
+                </button>
+</div>
+</section>
+<!-- Metrics Bento Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+<!-- Performance Trend Chart -->
+<div class="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-[0px_2px_4px_rgba(30,58,138,0.05)]">
+<div class="flex justify-between items-center mb-lg">
+<h3 class="text-h3 font-h3 text-primary">Tren Performa Mingguan</h3>
+<div class="flex gap-sm">
+<span class="text-body-sm text-on-surface-variant px-sm py-1 bg-surface-container rounded">Sen - Min</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">more_vert</span>
+</div>
+</div>
+<!-- Visual Chart Simulation -->
+<div class="h-48 flex items-end justify-between gap-md px-sm">
+<div class="flex flex-col items-center gap-sm w-full">
+<div class="w-full bg-primary-container/10 rounded-t-lg h-24 hover:bg-primary-container/20 transition-colors"></div>
+<span class="text-label-md font-label-md text-on-surface-variant">S</span>
+</div>
+<div class="flex flex-col items-center gap-sm w-full">
+<div class="w-full bg-primary-container/10 rounded-t-lg h-32 hover:bg-primary-container/20 transition-colors"></div>
+<span class="text-label-md font-label-md text-on-surface-variant">S</span>
+</div>
+<div class="flex flex-col items-center gap-sm w-full">
+<div class="w-full bg-primary-container/10 rounded-t-lg h-40 hover:bg-primary-container/20 transition-colors"></div>
+<span class="text-label-md font-label-md text-on-surface-variant">R</span>
+</div>
+<div class="flex flex-col items-center gap-sm w-full">
+<div class="w-full bg-primary rounded-t-lg h-44 shadow-lg shadow-primary/20"></div>
+<span class="text-label-md font-label-md text-primary font-bold">K</span>
+</div>
+<div class="flex flex-col items-center gap-sm w-full">
+<div class="w-full bg-primary-container/10 rounded-t-lg h-36 hover:bg-primary-container/20 transition-colors"></div>
+<span class="text-label-md font-label-md text-on-surface-variant">J</span>
+</div>
+<div class="flex flex-col items-center gap-sm w-full">
+<div class="w-full bg-primary-container/10 rounded-t-lg h-28 hover:bg-primary-container/20 transition-colors"></div>
+<span class="text-label-md font-label-md text-on-surface-variant">S</span>
+</div>
+<div class="flex flex-col items-center gap-sm w-full">
+<div class="w-full bg-primary-container/10 rounded-t-lg h-20 hover:bg-primary-container/20 transition-colors"></div>
+<span class="text-label-md font-label-md text-on-surface-variant">M</span>
+</div>
+</div>
+<div class="mt-lg flex items-center justify-between border-t border-outline-variant pt-md">
+<p class="text-body-sm text-on-surface-variant">Efisiensi Rute: <span class="text-on-surface font-bold">94%</span></p>
+<p class="text-body-sm text-on-surface-variant">Ketepatan Waktu: <span class="text-secondary font-bold">+12% vs minggu lalu</span></p>
+</div>
+</div>
+<!-- Fuel Efficiency Score Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-[0px_2px_4px_rgba(30,58,138,0.05)] flex flex-col justify-between">
+<div>
+<h3 class="text-h3 font-h3 text-primary mb-xs">Skor Efisiensi</h3>
+<p class="text-body-sm text-on-surface-variant mb-lg">Bahan Bakar &amp; Emisi</p>
+<div class="relative flex items-center justify-center h-32">
+<!-- Progress Circle SVG -->
+<svg class="w-32 h-32 transform -rotate-90">
+<circle class="text-surface-container-high" cx="64" cy="64" fill="transparent" r="56" stroke="currentColor" stroke-width="12"></circle>
+<circle class="text-primary" cx="64" cy="64" fill="transparent" r="56" stroke="currentColor" stroke-dasharray="351.85" stroke-dashoffset="52.77" stroke-width="12"></circle>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="text-h2 font-h2 text-on-surface">85</span>
+<span class="text-label-md font-label-md text-on-surface-variant">Grade A</span>
+</div>
+</div>
+</div>
+<div class="space-y-sm mt-md">
+<div class="flex justify-between items-center text-body-md">
+<span class="text-on-surface-variant">Konsumsi Rata-rata</span>
+<span class="font-data-mono text-data-mono text-on-surface">12.4 km/L</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full w-[85%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-lg">
+<!-- Document Status -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-[0px_2px_4px_rgba(30,58,138,0.05)]">
+<h3 class="text-h3 font-h3 text-primary mb-lg">Status Dokumen</h3>
+<div class="space-y-md">
+<div class="flex items-center justify-between p-md bg-surface-container-low border border-outline-variant rounded-lg">
+<div class="flex items-center gap-md">
+<div class="bg-secondary/10 p-sm rounded-lg">
+<span class="material-symbols-outlined text-secondary">badge</span>
+</div>
+<div>
+<p class="text-label-md font-label-md text-on-surface">SIM B1 Umum</p>
+<p class="text-body-sm text-on-surface-variant">Exp: 14 Okt 2026</p>
+</div>
+</div>
+<span class="bg-secondary-container text-on-secondary-container px-sm py-1 rounded text-label-md font-label-md">Aktif</span>
+</div>
+<div class="flex items-center justify-between p-md bg-surface-container-low border border-outline-variant rounded-lg">
+<div class="flex items-center gap-md">
+<div class="bg-secondary/10 p-sm rounded-lg">
+<span class="material-symbols-outlined text-secondary">featured_play_list</span>
+</div>
+<div>
+<p class="text-label-md font-label-md text-on-surface">STNK B 9012 UI</p>
+<p class="text-body-sm text-on-surface-variant">Exp: 22 Des 2024</p>
+</div>
+</div>
+<span class="bg-secondary-container text-on-secondary-container px-sm py-1 rounded text-label-md font-label-md">Aktif</span>
+</div>
+<div class="flex items-center justify-between p-md bg-surface-container-low border border-outline-variant rounded-lg">
+<div class="flex items-center gap-md">
+<div class="bg-tertiary/10 p-sm rounded-lg">
+<span class="material-symbols-outlined text-tertiary">medical_services</span>
+</div>
+<div>
+<p class="text-label-md font-label-md text-on-surface">KIR Berkala</p>
+<p class="text-body-sm text-on-surface-variant">Perlu diperbarui dalam 14 hari</p>
+</div>
+</div>
+<span class="bg-tertiary-fixed text-on-tertiary-fixed px-sm py-1 rounded text-label-md font-label-md">Mendekati</span>
+</div>
+</div>
+</div>
+<!-- Recent Deliveries -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-[0px_2px_4px_rgba(30,58,138,0.05)]">
+<h3 class="text-h3 font-h3 text-primary mb-lg">Riwayat Pengiriman Terakhir</h3>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="border-b border-outline-variant">
+<th class="pb-md font-label-md text-label-md text-on-surface-variant">Tujuan</th>
+<th class="pb-md font-label-md text-label-md text-on-surface-variant">Waktu</th>
+<th class="pb-md font-label-md text-label-md text-on-surface-variant">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr class="hover:bg-surface-container transition-colors group">
+<td class="py-md">
+<p class="text-body-md font-bold text-on-surface">SDN 01 Menteng</p>
+<p class="text-body-sm text-on-surface-variant">120 Paket MBG</p>
+</td>
+<td class="py-md text-body-sm text-on-surface-variant">08:15 AM</td>
+<td class="py-md">
+<span class="bg-secondary-container text-on-secondary-container px-sm py-1 rounded text-label-md font-label-md">Selesai</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container transition-colors">
+<td class="py-md">
+<p class="text-body-md font-bold text-on-surface">SMPN 05 Jakarta</p>
+<p class="text-body-sm text-on-surface-variant">250 Paket MBG</p>
+</td>
+<td class="py-md text-body-sm text-on-surface-variant">10:30 AM</td>
+<td class="py-md">
+<span class="bg-secondary-container text-on-secondary-container px-sm py-1 rounded text-label-md font-label-md">Selesai</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container transition-colors">
+<td class="py-md">
+<p class="text-body-md font-bold text-on-surface">Kantor Kelurahan Senayan</p>
+<p class="text-body-sm text-on-surface-variant">45 Paket MBG</p>
+</td>
+<td class="py-md text-body-sm text-on-surface-variant">12:45 PM</td>
+<td class="py-md">
+<span class="bg-secondary-container text-on-secondary-container px-sm py-1 rounded text-label-md font-label-md">Selesai</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-md text-center">
+<a class="text-primary font-label-md text-label-md hover:underline" href="#">Lihat Semua Riwayat</a>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-sm bg-surface border-t border-outline-variant shadow-md">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors px-4 py-1" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-label-md font-label-md">Stats</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors px-4 py-1" href="#">
+<span class="material-symbols-outlined">map</span>
+<span class="text-label-md font-label-md">Routes</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors px-4 py-1" href="#">
+<span class="material-symbols-outlined">domain</span>
+<span class="text-label-md font-label-md">Schools</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_shipping</span>
+<span class="text-label-md font-label-md">Drivers</span>
+</a>
+</nav>
+</body></html>
