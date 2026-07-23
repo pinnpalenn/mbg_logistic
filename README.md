@@ -1,23 +1,31 @@
-📦 MBG Logistic System
-StatusVersionLicense
+<h1 align="center">📦 MBG Logistic System</h1>
 
-Sistem manajemen logistik (MBG Logistic) yang dirancang untuk melacak pengiriman, memanajemen inventaris gudang, dan mengoptimalkan rute distribusi barang secara efisien menggunakan algoritma optimasi rute.
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-Active-success?style=for-the-badge" alt="Status">
+  <img src="https://img.shields.io/badge/Version-1.0.0-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License">
+</p>
 
-✨ Fitur Utama
-🚚 Pelacakan Pengiriman & Optimasi Rute: Memantau status lokasi barang dan menentukan rute terbaik (Route Optimization).
-📱 Integrasi Web & Mobile: Memiliki antarmuka berbasis Web (Frontend) dan Mobile.
-📄 Dokumentasi Lengkap: Menyertakan laporan metodologi, perancangan, hingga evaluasi sistem.
-🔒 Sistem Keamanan Akses: Akses terpusat untuk berbagai tipe pengguna.
-📸 Tangkapan Layar (Screenshot)
-Catatan: Berikut adalah tampilan dari sistem logistik saat beroperasi.
+<p align="center">
+  Sistem manajemen logistik (MBG Logistic) yang dirancang untuk melacak pengiriman, memanajemen inventaris gudang, dan mengoptimalkan rute distribusi barang secara efisien menggunakan algoritma optimasi rute.
+</p>
 
-Screenshot MBG Logistic
+<hr>
 
-📂 Struktur Folder
+## ✨ Fitur Utama
+- 🚚 **Pelacakan Pengiriman & Optimasi Rute:** Memantau status lokasi barang dan menentukan rute terbaik (Route Optimization).
+- 📱 **Integrasi Web & Mobile:** Memiliki antarmuka berbasis Web (Frontend) dan Mobile.
+- 📄 **Dokumentasi Lengkap:** Menyertakan laporan metodologi, perancangan, hingga evaluasi sistem.
+- 🔒 **Sistem Keamanan Akses:** Akses terpusat untuk berbagai tipe pengguna.
+
+## 📸 Tangkapan Layar (Screenshot)
+> **Catatan:** Berikut adalah tampilan dari sistem logistik saat beroperasi.
+
+![Screenshot MBG Logistic](https://via.placeholder.com/800x400.png?text=Screenshot+MBG+Logistic)
+
+## 📂 Struktur Folder
 Berdasarkan repository saat ini, berikut adalah struktur folder dari proyek MBG Logistic:
-
-text
-
+```text
 /mbg_logistic
 ├── __pycache__/                # File cache terkompilasi dari sistem Python
 ├── cache/                      # Direktori penyimpanan file sementara
@@ -29,12 +37,3 @@ text
 ├── Download_Diagram.html       # File diagram arsitektur/alur sistem
 ├── Laporan_Bab4_Bab5.md        # Laporan Implementasi & Evaluasi
 └── README.md                   # File dokumentasi utama ini
-🚀 Panduan Instalasi
-Clone repository: git clone https://github.com/pinnpalenn/mbg_logistic.git
-Konfigurasi file env atau variabel untuk menghubungkan frontend ke backend.
-Jalankan aplikasi web di dalam folder frontend/ atau jalankan emulator untuk mbg_mobile/.
-Pastikan layanan optimasi rute Python telah berjalan dengan baik.
-📄 Lisensi (License)
-Proyek ini dilindungi dan dilisensikan oleh MIT License. Diizinkan untuk penggunaan edukasi maupun modifikasi dengan atribusi kepada pembuat.
-
-Dibuat dengan ❤️ oleh Alvin Afalen
