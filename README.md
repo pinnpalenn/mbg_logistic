@@ -19,9 +19,10 @@
 - 🔒 **Sistem Keamanan Akses:** Akses terpusat untuk berbagai tipe pengguna.
 
 ## 📸 Tangkapan Layar (Screenshot)
-> **Catatan:** Berikut adalah tampilan dari sistem logistik saat beroperasi.
+> **Catatan:** Berikut adalah tampilan dashboard dari sistem MBG Logistik.
 
-![Screenshot MBG Logistic](https://via.placeholder.com/800x400.png?text=Screenshot+MBG+Logistic)
+<img width="1919" height="985" alt="image" src="https://github.com/user-attachments/assets/74331206-5279-45c0-a11e-593a84530190" />
+
 
 ## 📂 Struktur Folder
 Berdasarkan repository saat ini, berikut adalah struktur folder dari proyek MBG Logistic:
